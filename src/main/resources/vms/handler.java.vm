@@ -1,0 +1,105 @@
+package com.xy.data.handler;
+
+import com.xy.data.entity.${templatesTable.sourceUniqueName}.${templatesTable.sourceName};
+import com.xy.data.entity.${templatesTable.uniqueName}.${templatesTable.entityName};
+import com.xy.data.handler.v1.PageDataPushHandler;
+import com.xy.data.handler.v1.PagePlusDataPushHandler;
+import com.xy.data.handler.v1.TimeDataPushHandler;
+import com.xy.data.mapper.${templatesTable.uniqueName}.${templatesTable.mapperName};
+import com.xy.data.util.BeanUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
+
+/**
+ * @Author: xiangwei
+ * @Date: 2022/7/18 10:06
+ * @Description
+ **/
+@Component
+@Slf4j
+public class ${templatesTable.handlerName} extends PagePlusDataPushHandler<${templatesTable.entityName}, ${templatesTable.sourceName}> {
+    ${templatesTable.handlerName}() {
+        super(${templatesTable.entityName}.class, ${templatesTable.sourceName}.class, ${templatesTable.mapperName}.class,  null,
+                null);
+    }
+
+    private String getFailedMsg(Integer status) {
+        switch (status) {
+            case 1:
+                return "您的推荐已被风控系统拦截，正在等待人工审核。";
+            case 3:
+                return "您的推荐已被风控系统识别存在刷分情节，推荐无效。";
+            case 4:
+                return "您的账号涉嫌恶意刷取平台积分，进行不当获利。";
+            case 5:
+                return "推荐积分已达上限。";
+            case 7:
+                return "该用户已被其他人推荐成功。";
+            case 8:
+                return "该亲友早于推荐时间已注册，故推荐无效。";
+            case 9:
+                return "该亲友未注册。";
+            default:
+                return "";
+        }
+
+    }
+
+    private String getIdentity(String identity) {
+        if (identity == null) {
+            return null;
+        }
+        if (identity.contains("会员")) {
+            return "1";
+        }
+        if (identity.contains("员工")) {
+            return "2";
+        }
+        if (Arrays.asList("业户", "业主", "住户", "租户").contains(identity)) {
+            return "3";
+        }
+        if (identity.contains("历史业主")) {
+            return "4";
+        }
+        return null;
+    }
+
+    @Override
+    protected List<${templatesTable.entityName}> getData(List<${templatesTable.sourceName}> data) {
+        List<${templatesTable.entityName}> ${templatesTable.lowerEntityName}List = new ArrayList();
+        data.forEach(e -> {
+            ${templatesTable.entityName} ${templatesTable.lowerEntityName} = ${templatesTable.entityName}.builder()
+    #foreach(${templatesFields} in ${templatesTable.templatesFields})
+        #if("$!templatesFields.valueMap" == "")
+            #if("$!{templatesFields.value}" == "")
+                #set($getEntity= ${templatesFields.propertyName})
+            #else
+                #set($getEntity= ${templatesFields.value})
+            #end
+                    .${templatesFields.lowerPropertyName}(e.get${getEntity}())
+        #end
+    #end
+                    .build();
+
+            ${templatesTable.lowerEntityName}List.add(${templatesTable.lowerEntityName});
+        });
+        return ${templatesTable.lowerEntityName}List;
+    }
+
+    @Override
+    protected void deleteBeforeExtension(List<${templatesTable.sourceName}> r, List<${templatesTable.entityName}> t) {
+
+    }
+
+    @Override
+    protected void saveBeforeExtension(List<${templatesTable.sourceName}> r, List<${templatesTable.entityName}> t) {
+
+    }
+
+    @Override
+    protected void saveAfterExtension(List<${templatesTable.sourceName}> r, List<${templatesTable.entityName}> t) {
+
+    }
+}

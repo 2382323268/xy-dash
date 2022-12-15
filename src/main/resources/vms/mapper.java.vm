@@ -1,0 +1,12 @@
+package com.xy.data.mapper.${templatesTable.uniqueName};
+
+import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.xy.data.entity.${templatesTable.uniqueName}.${templatesTable.entityName};
+import org.springframework.stereotype.Repository;
+
+@Repository
+@DS("${templatesTable.uniqueName}")
+public interface ${templatesTable.mapperName} extends BaseMapper<${templatesTable.entityName}> {
+
+}

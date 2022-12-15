@@ -1,0 +1,54 @@
+package com.xy.data.entity.${templatesTable.uniqueName};
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.dynamic.datasource.annotation.DS;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+#foreach(${templatesFields} in ${templatesTable.templatesFields})
+#if($!{templatesFields.pkg})
+import ${templatesFields.pkg}
+#end
+#end
+#if(${templatesTable.migration})
+import com.xy.data.annotation.Inset;
+#end
+#if(${templatesTable.type})
+import com.xy.data.annotation.SqlServer;
+#end
+
+@DS("${templatesTable.uniqueName}")
+@Data
+@TableName("${templatesTable.name}")
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+#if(${templatesTable.migration})
+@Inset
+#end
+#if(${templatesTable.type})
+@SqlServer
+#end
+public class ${templatesTable.entityName} {
+
+    private static final long serialVersionUID = 1L;
+
+    #foreach(${templatesFields} in ${templatesTable.templatesFields})
+    /**
+     * ${templatesFields.remark}
+     */
+    #if(${templatesFields.status.equals(1)})
+    @TableId(value = "${templatesFields.fieldName}")
+    #else
+    @TableField(value = "${templatesFields.fieldName}")
+    #end
+    @ApiModelProperty("${templatesFields.remark}")
+    private ${templatesFields.propertyType} ${templatesFields.lowerPropertyName};
+
+    #end
+}

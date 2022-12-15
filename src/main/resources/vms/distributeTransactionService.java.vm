@@ -1,0 +1,128 @@
+package com.xy.data.util;
+
+import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @Author: xiangwei
+ * @Date: 2022/7/19 18:05
+ * @Description
+ **/
+@Service
+@Transactional
+@Slf4j
+public class DistributeTransactionService<T> {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    #foreach(${dataSources} in ${xy.migrationDataSources})
+    @DS("${dataSources.uniqueName}")
+    public int ${dataSources.uniqueName}(List<T> t) {
+        return batchSaveHandler(t);
+    }
+    #end
+
+    public int batchSaveHandler(List<T> t) {
+        StringBuilder insert = null;
+        for (T value : t) {
+            if (StringUtils.isEmpty(insert)) {
+                insert = new StringBuilder(getSql(value));
+            }
+            insert.append(" (");
+            try {
+                append(value, insert);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            insert.append(")");
+            insert.append(",");
+        }
+        batchSave(insert);
+        return t.size();
+    }
+
+
+    public void batchSave(StringBuilder sql) {
+        // log.info("sql = {}", sql);
+        jdbcTemplate.execute(sql.substring(0, sql.length() - 1));
+    }
+
+    private void append(T t, StringBuilder builder) throws IllegalAccessException {
+        for (Field declaredField : getFields(t)) {
+            if (declaredField.isAnnotationPresent(TableField.class) || declaredField.isAnnotationPresent(TableId.class)) {
+                declaredField.setAccessible(true);
+                Object value = declaredField.get(t);
+                if (value == null) {
+                    builder.append("null");
+                } else {
+                    if (value instanceof String && value.toString().contains("'")) {
+                        builder.append("'").append(value.toString().replace("'", "\'\'")).append("'");
+                    } else if (value instanceof String && value.toString().contains("\\")) {
+                        builder.append("'").append(value.toString().replace("\\", "\\\\")).append("'");
+                    } else if (value instanceof Integer || value instanceof Long) {
+                        builder.append(value);
+                    } else if (value instanceof Boolean) {
+                        builder.append(value.equals(false) ? 0 : 1);
+                    } else {
+                        builder.append("'").append(value).append("'");
+                    }
+                }
+                builder.append(", ");
+            }
+        }
+        builder.replace(builder.length() - 2, builder.length() - 1, "");
+    }
+
+    private String getSql(T t) {
+        for (Map.Entry<Class, String> entry : SqlConstant.sqlMap.entrySet()) {
+            if (entry.getKey() == t.getClass()) {
+                return entry.getValue();
+            }
+        }
+        log.info("未找到对应sql, t = {}, sqlMap = {}", t, SqlConstant.sqlMap);
+        throw new RuntimeException("未找到对应sql");
+    }
+
+    private Field[] getFields(T t) {
+        for (Map.Entry<Class, Field[]> entry : SqlConstant.fieldMap.entrySet()) {
+            if (entry.getKey() == t.getClass()) {
+                return entry.getValue();
+            }
+        }
+        log.info("未找到对应Fields, t = {}, sqlMap = {}", t, SqlConstant.fieldMap);
+        throw new RuntimeException("未找到对应Fields");
+    }
+
+    public static <T> int batchSave(List<T> t,String dsName) {
+        if (CollectionUtils.isEmpty(t)) {
+            return 0;
+        }
+
+        DistributeTransactionService<T> bean = SpringUtil.getBean(DistributeTransactionService.class);
+        Method method = SqlConstant.methodMap.get(dsName);
+        if (ObjectUtils.isNotEmpty(method)) {
+            try {
+                return (int) method.invoke(bean, t);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
+        throw new RuntimeException("未找到对应的插入数据源！");
+    }
+}

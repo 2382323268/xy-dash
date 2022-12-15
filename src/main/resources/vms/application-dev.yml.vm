@@ -1,0 +1,72 @@
+#set($maxActive=${xy.migrations.threadCount}*2)
+server:
+  port: ${xy.migrations.port}
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    # 配置数据源信息
+    dynamic:
+      # 设置默认的数据源或者数据源组,默认值即为master
+      primary: master
+      # 严格匹配数据源,默认false.true未匹配到指定数据源时抛异常,false使用默认数据源
+      strict: false
+      datasource:
+        #foreach(${dataSources} in ${xy.migrationDataSources})
+          #if($!{dataSources.port})
+            #set($port=":${dataSources.port}")
+            #else
+              #set($port="")
+          #end
+          #if(${dataSources.type.equals(0)})
+            #set($url="jdbc:mysql://${dataSources.ip}$port/${dataSources.databaseName}?serverTimezone=GMT%2B8&useSSL=FALSE&rewriteBatchedStatements=true")
+            #set($driver="com.mysql.cj.jdbc.Driver")
+          #else
+            #set($url="jdbc:sqlserver://${dataSources.ip}$port;DatabaseName=${dataSources.databaseName};useNTLMv2=true")
+            #set($driver="com.microsoft.sqlserver.jdbc.SQLServerDriver")
+          #end
+        ${dataSources.uniqueName}:
+          url: ${url}
+          driver-class-name: ${driver}
+          username: ${dataSources.userName}
+          password: ${dataSources.password}
+        #end
+      # druid 全局配置
+      druid:
+        initialSize: ${xy.migrations.threadCount}
+        minIdle: 5
+        maxActive: ${maxActive}
+        # 配置获取连接等待超时的时间
+        maxWait: 60000
+        # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+        timeBetweenEvictionRunsMillis: 60000
+        # 配置一个连接在池中最小生存的时间，单位是毫秒
+        minEvictableIdleTimeMillis: 300000
+        #        validationQuery: SELECT 1 FROM DUAL
+        #        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        # 打开PSCache，并且指定每个连接上PSCache的大小
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+#logging:
+#  level:
+#    com.xy.data.mapper: debug
+
+# 配置
+data:
+  config:
+    sqlSpliec: ${xy.migrations.sqlSpliec}
+    # 线程数量
+    threadCount: ${xy.migrations.threadCount}
+    # 是否多线程
+    isThread: ${xy.migrations.startThread}
+    # 每次查询多少条
+    limit: ${xy.migrations.count}
+    # 是否删除
+    isDelete: true
+
+swagger:
+  enable: false

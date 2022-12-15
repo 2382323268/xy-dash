@@ -1,0 +1,24 @@
+package com.xy.data.service.${templatesTable.uniqueName}.impl;
+
+import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xy.data.entity.${templatesTable.uniqueName}.${templatesTable.entityName};
+import com.xy.data.mapper.${templatesTable.uniqueName}.${templatesTable.mapperName};
+import com.xy.data.service.${templatesTable.uniqueName}.${templatesTable.serviceName};
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+/**
+ * <p>
+ * 应⽤ 服务实现类
+ * </p>
+ *
+ * @author author
+ * @since 2022-04-13
+ */
+@Slf4j
+@DS("${templatesTable.uniqueName}")
+@Service
+public class ${templatesTable.implName} extends ServiceImpl<${templatesTable.mapperName}, ${templatesTable.entityName}> implements
+    ${templatesTable.serviceName} {
+}

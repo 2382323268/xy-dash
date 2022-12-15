@@ -1,0 +1,8 @@
+package com.xy.data.servhandlerice.${templatesTable.uniqueName};
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.xy.data.entity.${templatesTable.uniqueName}.${templatesTable.entityName};
+
+public interface ${templatesTable.serviceName} extends IService<${templatesTable.entityName}> {
+
+}
