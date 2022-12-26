@@ -58,6 +58,10 @@ public class Migrations extends BaseEntity implements Serializable {
     @ApiModelProperty("是否sql拼接插入")
     private Boolean sqlSpliec;
 
+    @ApiModelProperty("是否删除")
+    @NotNull(message = "是否删除参数不能为空")
+    private Boolean isDel;
+
     @TableField(exist = false)
     private List<MigrationDataSources> migrationDataSources;
 }
