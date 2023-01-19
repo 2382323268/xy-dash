@@ -31,4 +31,6 @@ public class DataCountVO {
 
     private String id;
 
+    private Throwable throwable;
+
 }

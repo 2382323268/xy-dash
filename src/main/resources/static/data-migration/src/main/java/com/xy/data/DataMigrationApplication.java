@@ -1,7 +1,7 @@
 package com.xy.data;
 
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure;
-import com.xy.data.handler.DataPushHandler;
+import com.xy.data.handler.core.DataPushHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;

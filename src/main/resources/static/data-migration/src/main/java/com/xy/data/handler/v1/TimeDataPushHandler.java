@@ -1,7 +1,7 @@
 package com.xy.data.handler.v1;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.xy.data.handler.DataPushHandler;
+import com.xy.data.handler.core.DataPushHandler;
 import com.xy.data.util.DataPushConstant;
 import com.xy.data.util.SqlConstant;
 import com.xy.data.vo.DataCountVO;
@@ -120,7 +120,6 @@ public abstract class TimeDataPushHandler<T, R> extends DataPushHandler<T, R> {
     private DataCountVO singleOrMultiThread(List<R> selectData, BiFunction<List<R>, Integer, DataCountVO> function) throws Exception {
 
         int count = limit / threadCount;
-
         //单线程处理
         if (!isThread) {
             // 具体的逻辑处理 抽象出去
@@ -136,12 +135,17 @@ public abstract class TimeDataPushHandler<T, R> extends DataPushHandler<T, R> {
             int finalI = i;
             list.add(pushExecutor.submit(() -> {
                 List<R> collect = selectData.stream().skip(finalI).limit(count).collect(Collectors.toList());
-                // 具体的逻辑处理 抽象出去
-                return function.apply(collect, count);
+                try {
+                    // 具体的逻辑处理 抽象出去
+                    return function.apply(collect, count);
+                } catch (Exception e) {
+                    return DataCountVO.builder().throwable(e).build();
+                }
             }));
         }
         for (Future<DataCountVO> integerFuture : list) {
             DataCountVO dataCountVO = integerFuture.get();
+            throwException(dataCountVO);
             save += dataCountVO.getSave();
             delete += dataCountVO.getDelete();
         }

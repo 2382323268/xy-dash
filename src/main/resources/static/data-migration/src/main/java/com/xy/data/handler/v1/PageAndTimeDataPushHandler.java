@@ -1,11 +1,11 @@
-package com.xy.data.handler.v2;
+package com.xy.data.handler.v1;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.xy.data.handler.DataPushHandler;
+import com.xy.data.handler.core.DataPushHandler;
 import com.xy.data.vo.DataCountVO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,11 +17,12 @@ import java.util.function.Supplier;
 /**
  * @Author: xiangwei
  * @Date: 2022/10/31 15:15
- * @Description 分页+主键id迁移数据
+ * @Description 分页+创建时间迁移数据
  **/
 @Slf4j
-public abstract class PagePlusDataV2PushHandler<T, R> extends DataPushHandler<T, R> {
-    public PagePlusDataV2PushHandler(Class<T> tClass, Class<R> rClass, Class<?> mapper, String start, String end) {
+@Deprecated
+public abstract class PageAndTimeDataPushHandler<T, R> extends DataPushHandler<T, R> {
+    public PageAndTimeDataPushHandler(Class<T> tClass, Class<R> rClass, Class<?> mapper, String start, String end) {
         super(tClass, rClass, mapper, start, end);
     }
 
@@ -32,22 +33,22 @@ public abstract class PagePlusDataV2PushHandler<T, R> extends DataPushHandler<T,
         int saveAll = 0;
         int index = 0;
         int deleteAll = 0;
-        String id = null;
-
+        List<String> neIds = null;
+        start = start == null ? LocalDateTime.of(1, 1, 1, 0, 0) : start;
         int total = total(start, end);
 
         log.info("开始迁移数据: " + msg + ",  分页总数量: {}", total);
 
         for (int i = 0; i < total; i = i + limit) {
+            LocalDateTime finalStart = start;
+            List<String> finalNeIds = neIds;
 
             // 单线程或者多线程
-            LocalDateTime finalStart = start;
-            String finalId = id;
             DataCountVO dataCountVO = singleOrMultiThread(() -> {
                 // 1.查数据
-                List<R> selectData = selectData(current, size, finalStart, end, finalId);
+                List<R> selectData = selectData(current, size, finalStart, end, finalNeIds);
                 if (selectData == null || selectData.size() == 0) {
-                    this.count.incrementAndGet();
+                    blockOperation();
                     return DataCountVO.builder().save(0).delete(0).build();
                 }
                 /**
@@ -60,7 +61,7 @@ public abstract class PagePlusDataV2PushHandler<T, R> extends DataPushHandler<T,
                 /**
                  * 3.删除重复数据
                  */
-                int delete = 0;//deleteByIds(data);
+                int delete = deleteByIds(data);
                 /**
                  * 1.多线程需要等所有线程删除完再走下一步
                  * 2.删除+索引失效 会表锁
@@ -76,36 +77,32 @@ public abstract class PagePlusDataV2PushHandler<T, R> extends DataPushHandler<T,
                 // 保存之后逻辑扩展
                 saveAfterExtension(selectData, data);
 
-                return DataCountVO.builder().save(save).id(id(selectData)).delete(delete).build();
+                LocalDateTime startDateTime = startDateTime(selectData);
+                return DataCountVO.builder().save(save).neIds(neIds(startDateTime, selectData)).start(startDateTime).delete(delete).build();
             });
             this.count.set(0);
             current.set(0);
             index++;
             saveAll += dataCountVO.getSave();
             deleteAll += dataCountVO.getDelete();
-            id = dataCountVO.getId();
-            log.info("迁移数据 " + msg + ", 第{}轮结束, 结束id = {}", index, id);
+            neIds = dataCountVO.getNeIds();
+            start = dataCountVO.getStart();
+            log.info("迁移数据 " + msg + ", 第{}轮结束", index);
         }
         log.info("迁移数据" + msg + "完成, 一共添加{}条记录, 删除重复数据{}条", saveAll, deleteAll);
 
     }
 
-    private List<R> selectData(AtomicInteger current, Integer size, LocalDateTime start, LocalDateTime end, String id) {
+    private List<R> selectData(AtomicInteger current, Integer size, LocalDateTime start, LocalDateTime end, List<String> neIds) {
         int i = current.incrementAndGet();
-        String idName = getId();
-        QueryWrapper<R> queryWrapper = null;
+        String id = getId();
         String createdTime = getCreatedTime();
-        if (createdTime == null) {
-            queryWrapper = queryWrapper().gt(!StringUtils.isEmpty(id), idName, id);
-        } else {
-            boolean timestamp = !getFCreatedTime().getType().equals(LocalDateTime.class);
-            queryWrapper = queryWrapper()
-                    .ge(start != null, createdTime, timestamp ? asLong(start) : start)
-                    .le(end != null, createdTime, timestamp ? asLong(end) : end)
-                    .gt(!StringUtils.isEmpty(id), idName, id);
-        }
-
-        queryWrapper.orderByAsc(idName);
+        boolean timestamp = !getFCreatedTime().getType().equals(LocalDateTime.class);
+        QueryWrapper<R> queryWrapper = queryWrapper()
+                .ge(createdTime, timestamp ? asLong(start) : start)
+                .le(end != null, createdTime, timestamp ? asLong(end) : end)
+                .notIn(!CollectionUtils.isEmpty(neIds), id, neIds);
+        queryWrapper.orderByAsc(createdTime);
         return getRService().page(new Page<>(i, size, Boolean.FALSE), queryWrapper).getRecords();
     }
 
@@ -122,58 +119,41 @@ public abstract class PagePlusDataV2PushHandler<T, R> extends DataPushHandler<T,
             // 具体的逻辑处理 抽象出去
             return function.get();
         }
-
+        int save = 0;
+        int delete = 0;
+        LocalDateTime start = null;
+        List<String> neIds = null;
         //多线程处理
         List<Future<DataCountVO>> list = new ArrayList<>();
         for (Integer i = 0; i < threadCount; i++) {
             list.add(pushExecutor.submit(() -> {
-                // 具体的逻辑处理 抽象出去
-                return function.get();
+                try {
+                    // 具体的逻辑处理 抽象出去
+                    return function.get();
+                } catch (Exception e) {
+                    return DataCountVO.builder().throwable(e).build();
+                }
             }));
         }
 
-        int save = 0;
-        int delete = 0;
-        String id = null;
         for (Future<DataCountVO> integerFuture : list) {
             DataCountVO dataCountVO = integerFuture.get();
+            throwException(dataCountVO);
             save += dataCountVO.getSave();
             delete += dataCountVO.getDelete();
 
-            if (dataCountVO.getId() != null) {
-                if (id == null) {
-                    id = dataCountVO.getId();
+            if (dataCountVO.getStart() != null) {
+                if (start == null) {
+                    start = dataCountVO.getStart();
+                    neIds = dataCountVO.getNeIds();
                 } else {
-                    id = MaxId(id, dataCountVO.getId());
+                    if (dataCountVO.getStart().isAfter(start)) {
+                        start = dataCountVO.getStart();
+                        neIds = dataCountVO.getNeIds();
+                    }
                 }
             }
         }
-        return DataCountVO.builder().id(id).save(save).delete(delete).build();
-    }
-
-    private String MaxId(String id, String id1) {
-        Class<?> type = getIdType();
-        if (type.equals(Integer.class)) {
-            if (Integer.valueOf(id).compareTo(Integer.valueOf(id1)) > 0) {
-                return id;
-            } else {
-                return id1;
-            }
-        }
-        if (type.equals(Long.class)) {
-            if (Long.valueOf(id).compareTo(Long.valueOf(id1)) > 0) {
-                return id;
-            } else {
-                return id1;
-            }
-        }
-        if (type.equals(String.class)) {
-            if (id.compareTo(id1) > 0) {
-                return id;
-            } else {
-                return id1;
-            }
-        }
-        throw new RuntimeException("暂不支持该主键id类型！");
+        return DataCountVO.builder().neIds(neIds).start(start).save(save).delete(delete).build();
     }
 }

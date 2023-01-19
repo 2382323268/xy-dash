@@ -2,7 +2,7 @@ package com.xy.data.handler.v1;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.xy.data.handler.DataPushHandler;
+import com.xy.data.handler.core.DataPushHandler;
 import com.xy.data.vo.DataCountVO;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,6 +19,7 @@ import java.util.function.Supplier;
  * @Description 分页迁移数据
  **/
 @Slf4j
+@Deprecated
 public abstract class PageDataPushHandler<T, R> extends DataPushHandler<T, R> {
 
     public PageDataPushHandler(Class<T> tClass, Class<R> rClass, Class<?> mapper, String start, String end) {
@@ -43,7 +44,7 @@ public abstract class PageDataPushHandler<T, R> extends DataPushHandler<T, R> {
                 // 1.查数据
                 List<R> selectData = selectData(current, size, start, end);
                 if (selectData == null || selectData.size() == 0) {
-                    this.count.incrementAndGet();
+                    blockOperation();
                     return DataCountVO.builder().save(0).delete(0).build();
                 }
 
@@ -57,7 +58,7 @@ public abstract class PageDataPushHandler<T, R> extends DataPushHandler<T, R> {
                 /**
                  * 3.删除重复数据
                  */
-                int delete = 0;//deleteByIds(data);
+                int delete = deleteByIds(data);
                 /**
                  * 1.多线程需要等所有线程删除完再走下一步
                  * 2.删除+索引失效 会表锁
@@ -115,12 +116,17 @@ public abstract class PageDataPushHandler<T, R> extends DataPushHandler<T, R> {
         List<Future<DataCountVO>> list = new ArrayList<>();
         for (Integer i = 0; i < threadCount; i++) {
             list.add(pushExecutor.submit(() -> {
-                // 具体的逻辑处理 抽象出去
-                return function.get();
+                try {
+                    // 具体的逻辑处理 抽象出去
+                    return function.get();
+                } catch (Exception e) {
+                    return DataCountVO.builder().throwable(e).build();
+                }
             }));
         }
         for (Future<DataCountVO> integerFuture : list) {
             DataCountVO dataCountVO = integerFuture.get();
+            throwException(dataCountVO);
             save += dataCountVO.getSave();
             delete += dataCountVO.getDelete();
         }

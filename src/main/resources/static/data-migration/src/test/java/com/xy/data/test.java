@@ -1,6 +1,6 @@
 package com.xy.data;
 
-import com.xy.data.handler.DataPushHandler;
+import com.xy.data.handler.core.DataPushHandler;
 import com.xy.data.util.DistributeTransactionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

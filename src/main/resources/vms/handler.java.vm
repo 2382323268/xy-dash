@@ -2,9 +2,7 @@ package com.xy.data.handler;
 
 import com.xy.data.entity.${templatesTable.sourceUniqueName}.${templatesTable.sourceName};
 import com.xy.data.entity.${templatesTable.uniqueName}.${templatesTable.entityName};
-import com.xy.data.handler.v1.PageDataPushHandler;
-import com.xy.data.handler.v1.PagePlusDataPushHandler;
-import com.xy.data.handler.v1.TimeDataPushHandler;
+import com.xy.data.handler.v3.PageAndKeyDataPushV3Handler;
 import com.xy.data.mapper.${templatesTable.uniqueName}.${templatesTable.mapperName};
 import com.xy.data.util.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +17,7 @@ import java.util.*;
  **/
 @Component
 @Slf4j
-public class ${templatesTable.handlerName} extends PagePlusDataPushHandler<${templatesTable.entityName}, ${templatesTable.sourceName}> {
+public class ${templatesTable.handlerName} extends PageAndKeyDataPushV3Handler<${templatesTable.entityName}, ${templatesTable.sourceName}> {
     ${templatesTable.handlerName}() {
         super(${templatesTable.entityName}.class, ${templatesTable.sourceName}.class, ${templatesTable.mapperName}.class,  null,
                 null);
