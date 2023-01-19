@@ -1,6 +1,7 @@
 package com.xy.dash.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.xy.dash.aspect.GlobalLog;
 import com.xy.dash.converts.DataSourceConvert;
 import com.xy.dash.entity.*;
 import com.xy.dash.enums.DbColumnType;
@@ -54,6 +55,10 @@ public class MigrationsServiceImpl extends ServiceImpl<MigrationsMapper, Migrati
     public void generatingCode(Long id) {
         // 获取数据迁移配置
         Migrations migrations = getById(id);
+        if (migrations == null) {
+            throw new ServiceException("数据迁移配置不存在！");
+        }
+        migrations.setThreadCount(migrations.getThreadCount() == null ? 500 : migrations.getThreadCount());
         // 获取数据源配置
         List<TemplatesDataSources> templatesDataSources = migrationDataSourcesService.getTemplatesDataSources(id);
         // 获取表配置

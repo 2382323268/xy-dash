@@ -18,7 +18,7 @@ import ${templatesFields.pkg}
 #if(${templatesTable.migration})
 import com.xy.data.annotation.Inset;
 #end
-#if(${templatesTable.type})
+#if(${templatesTable.type} == 1)
 import com.xy.data.annotation.SqlServer;
 #end
 
@@ -31,7 +31,7 @@ import com.xy.data.annotation.SqlServer;
 #if(${templatesTable.migration})
 @Inset
 #end
-#if(${templatesTable.type})
+#if(${templatesTable.type} == 1)
 @SqlServer
 #end
 public class ${templatesTable.entityName} {

@@ -54,10 +54,10 @@ public class MigrationTablesServiceImpl extends ServiceImpl<MigrationTablesMappe
         migrationTables.forEach(e -> {
             TemplatesDataSources templatesDataSource = dataSourcesMap.get(e.getMigrationSourcesId());
             TemplatesTables templatesTable = new TemplatesTables();
+            BeanUtil.copyProperties(e, templatesTable);
             templatesTable.setUniqueName(templatesDataSource.getUniqueName());
             templatesTable.setType(templatesDataSource.getType());
             templatesTable.setTemplatesFields(migrationFieldsService.getTemplatesFields(e.getId()));
-            BeanUtil.copyProperties(e, templatesTable);
 
             String name = StringUtil.lineToHump(templatesTable.getName());
             String entityName = StringUtil.upperCase(name);

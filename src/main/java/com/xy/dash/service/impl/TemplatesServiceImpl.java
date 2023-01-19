@@ -89,7 +89,6 @@ public class TemplatesServiceImpl implements TemplatesService {
             contexts.put("templatesTable", templatesTable);
             StringBuilder path = new StringBuilder(String.format(rootPath.concat(e.getValue()), templatesTable.getUniqueName()));
             path.append(templatesTable.getName(e)).append(".java");
-            log.info("path = {}", path.toString());
             createFileByTemplate(e.getKey(), path.toString(), contexts);
         });
     }

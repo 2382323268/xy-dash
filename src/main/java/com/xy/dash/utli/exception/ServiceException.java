@@ -26,15 +26,6 @@ public class ServiceException extends RuntimeException {
         this.resultCode = resultCode;
     }
 
-    @Override
-    public Throwable fillInStackTrace() {
-        return this;
-    }
-
-    public Throwable doFillInStackTrace() {
-        return super.fillInStackTrace();
-    }
-
     public IResultCode getResultCode() {
         return this.resultCode;
     }

@@ -68,5 +68,9 @@ data:
     # 是否删除
     isDelete: ${xy.migrations.isDel}
 
+logging:
+  file:
+    name: D:/logs/wxw.log
+
 swagger:
   enable: false
