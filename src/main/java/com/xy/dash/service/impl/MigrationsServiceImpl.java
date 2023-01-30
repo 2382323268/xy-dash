@@ -20,10 +20,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -137,7 +134,7 @@ public class MigrationsServiceImpl extends ServiceImpl<MigrationsMapper, Migrati
             throw new ServiceException("sqlserver不支持sql拼接！");
         }
         if (uniqueNames.size() != migrationDataSources.size()) {
-            throw new ServiceException("唯一名称存在重复！");
+            throw new ServiceException("同一配置，数据源名称不能重复！");
         }
 
     }

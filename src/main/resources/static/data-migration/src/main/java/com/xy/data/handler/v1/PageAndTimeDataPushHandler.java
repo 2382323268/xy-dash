@@ -37,7 +37,7 @@ public abstract class PageAndTimeDataPushHandler<T, R> extends DataPushHandler<T
         start = start == null ? LocalDateTime.of(1, 1, 1, 0, 0) : start;
         int total = total(start, end);
 
-        log.info("开始迁移数据: " + msg + ",  分页总数量: {}", total);
+        log.info("开始数据迁移: " + msg + ",  分页总数量: {}", total);
 
         for (int i = 0; i < total; i = i + limit) {
             LocalDateTime finalStart = start;
@@ -87,9 +87,9 @@ public abstract class PageAndTimeDataPushHandler<T, R> extends DataPushHandler<T
             deleteAll += dataCountVO.getDelete();
             neIds = dataCountVO.getNeIds();
             start = dataCountVO.getStart();
-            log.info("迁移数据 " + msg + ", 第{}轮结束", index);
+            log.info("迁移数据: " + msg + ", 第{}轮结束", index);
         }
-        log.info("迁移数据" + msg + "完成, 一共添加{}条记录, 删除重复数据{}条", saveAll, deleteAll);
+        log.info("迁移数据:" + msg + "完成, 一共添加{}条记录, 删除重复数据{}条", saveAll, deleteAll);
 
     }
 

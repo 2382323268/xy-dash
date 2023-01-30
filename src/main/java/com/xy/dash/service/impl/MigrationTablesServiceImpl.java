@@ -69,19 +69,16 @@ public class MigrationTablesServiceImpl extends ServiceImpl<MigrationTablesMappe
             String implName = entityName.concat("ServiceImpl");
             String serviceName = entityName.concat("Service");
             String mapperName = entityName.concat("Mapper");
-            String handlerName = entityName.concat("Handler");
 
             templatesTable.setEntityName(entityName);
             templatesTable.setImplName(implName);
             templatesTable.setServiceName(serviceName);
             templatesTable.setMapperName(mapperName);
-            templatesTable.setHandlerName(handlerName);
 
             templatesTable.setLowerEntityName(StringUtil.lowerCase(entityName));
             templatesTable.setLowerImplName(StringUtil.lowerCase(implName));
             templatesTable.setLowerServiceName(StringUtil.lowerCase(serviceName));
             templatesTable.setLowerMapperName(StringUtil.lowerCase(mapperName));
-            templatesTable.setLowerHandlerName(StringUtil.lowerCase(handlerName));
             templatesTables.add(templatesTable);
         });
 
@@ -92,6 +89,9 @@ public class MigrationTablesServiceImpl extends ServiceImpl<MigrationTablesMappe
             }).findFirst();
             if (first.isPresent()) {
                 e.setSourceName(first.get().getEntityName());
+                String handlerName = e.getEntityName().concat("By").concat(first.get().getEntityName()).concat("Handler");
+                e.setHandlerName(handlerName);
+                e.setLowerHandlerName(StringUtil.lowerCase(handlerName));
             }
         });
         return templatesTables;

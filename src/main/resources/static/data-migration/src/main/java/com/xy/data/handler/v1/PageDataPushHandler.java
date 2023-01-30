@@ -36,7 +36,7 @@ public abstract class PageDataPushHandler<T, R> extends DataPushHandler<T, R> {
 
         int total = total(start, end);
 
-        log.info("开始迁移数据: " + msg + ",  分页总数量: {}", total);
+        log.info("开始数据迁移: " + msg + ",  分页总数量: {}", total);
 
         for (int i = 0; i < total; i = i + limit) {
             // 单线程或者多线程
@@ -81,9 +81,9 @@ public abstract class PageDataPushHandler<T, R> extends DataPushHandler<T, R> {
             index++;
             saveAll += dataCountVO.getSave();
             deleteAll += dataCountVO.getDelete();
-            log.info("迁移数据 " + msg + ", 第{}轮结束", index);
+            log.info("迁移数据: " + msg + ", 第{}轮结束", index);
         }
-        log.info("迁移数据" + msg + "完成, 一共添加{}条记录, 删除重复数据{}条", saveAll, deleteAll);
+        log.info("迁移数据:" + msg + "完成, 一共添加{}条记录, 删除重复数据{}条", saveAll, deleteAll);
 
     }
 

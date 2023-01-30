@@ -13,6 +13,7 @@ import lombok.ToString;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 @Data
 @TableName("xy_migration_data_sources")
@@ -35,10 +36,11 @@ public class MigrationDataSources extends BaseEntity implements Serializable {
     private String databaseName;
 
     /**
-     * 唯一名称
+     * 数据源名称
      */
-    @ApiModelProperty("唯一名称")
-    @NotBlank(message = "唯一名称不能为空")
+    @ApiModelProperty("数据源名称")
+    @NotBlank(message = "数据源名称不能为空")
+    @Pattern(message = "数据源名称只能为小写字母且长度小于6位", regexp = "^[a-z]{0,6}$")
     private String uniqueName;
 
     /**

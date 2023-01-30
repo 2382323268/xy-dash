@@ -1,5 +1,6 @@
 package com.xy.data.handler.core;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.xy.data.util.DistributeTransactionService;
 import com.xy.data.util.SpringUtil;
@@ -69,14 +70,19 @@ public abstract class DataPushHandler<T, R> extends DataPushUtil<T, R> {
     }
 
     private void push(LocalDateTime start, LocalDateTime end) {
-        String msg = tClass.getDeclaredAnnotation(TableName.class).value();
+        String tName = tClass.getDeclaredAnnotation(TableName.class).value();
+        String tDs = tClass.getDeclaredAnnotation(DS.class).value();
+        String rDs = rClass.getDeclaredAnnotation(DS.class).value();
+        String rName = rClass.getDeclaredAnnotation(TableName.class).value();
+        StringBuilder msg = new StringBuilder();
+        msg.append("数据源:").append(tDs).append(" 表名:").append(tName).append("迁移到---").append("数据源:").append(rDs).append(" 表名:").append(rName);
         try {
             long currentTimeMillis = System.currentTimeMillis();
-            pushData(msg, start, end);
-            log.info("迁移{}表耗时: {}", msg, (System.currentTimeMillis() - currentTimeMillis) / 1000 + "s");
+            pushData(msg.toString(), start, end);
+            log.info(msg + "耗时: {}", (System.currentTimeMillis() - currentTimeMillis) / 1000 + "s");
         } catch (Exception e) {
             e.printStackTrace();
-            log.info("迁移数据" + msg + "异常, e = {}", e.getMessage());
+            log.info(msg + "数据异常, e = {}", e.getMessage());
         }
     }
 

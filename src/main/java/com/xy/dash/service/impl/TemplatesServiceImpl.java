@@ -4,8 +4,10 @@ import com.xy.dash.enums.TemplatePathType;
 import com.xy.dash.service.TemplatesService;
 import com.xy.dash.vo.TemplatesAdd;
 import com.xy.dash.vo.TemplatesDataSources;
+import com.xy.dash.vo.TemplatesFields;
 import com.xy.dash.vo.TemplatesTables;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.implementation.bind.annotation.Super;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -16,8 +18,7 @@ import javax.servlet.ServletException;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -69,8 +70,31 @@ public class TemplatesServiceImpl implements TemplatesService {
                     new File(path).mkdirs();
                 });
 
+                /**
+                 * 需求：迁移表可能存在多个数据，但只需要生成一个实体类，同时需要统计所有数据需要的字段
+                 * 1.根据表名+数据源名称去重复
+                 * 2.重新计算字段数据
+                 */
+                List<TemplatesTables> collect = templatesTables.stream().collect(
+                        Collectors.collectingAndThen(
+                                Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(TemplatesTables::getEntityName))),
+                                ArrayList::new)
+                );
+                Map<String, List<TemplatesTables>> map = templatesTables.stream().collect(Collectors.groupingBy(TemplatesTables::getEntityName));
+                collect.forEach(v -> {
+                    List<TemplatesTables> tables = map.get(v.getEntityName());
+                    if (tables.size() > 1) {
+                        // 拿到所有字段 然后根据字段名称去重复
+                        List<TemplatesFields> templatesFields = tables.stream().map(TemplatesTables::getTemplatesFields).flatMap(Collection::stream).collect(
+                                Collectors.collectingAndThen(
+                                        Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(TemplatesFields::getFieldName))),
+                                        ArrayList::new)
+                        );
+                        v.setTemplatesFields(templatesFields);
+                    }
+                });
                 //生成基础代码
-                createFileByTemplateCommon(e, templatesTables, rootPath);
+                createFileByTemplateCommon(e, collect, rootPath);
             }
 
             if (e.isHandler()) {
