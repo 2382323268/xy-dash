@@ -1,6 +1,8 @@
 package com.xy.dash.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.xy.dash.aspect.GlobalLog;
 import com.xy.dash.converts.DataSourceConvert;
 import com.xy.dash.entity.*;
@@ -9,6 +11,8 @@ import com.xy.dash.mapper.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xy.dash.service.*;
 import com.xy.dash.utli.BeanUtil;
+import com.xy.dash.utli.Condition;
+import com.xy.dash.utli.Query;
 import com.xy.dash.utli.StringUtil;
 import com.xy.dash.utli.exception.ServiceException;
 import com.xy.dash.vo.*;
@@ -75,9 +79,11 @@ public class MigrationsServiceImpl extends ServiceImpl<MigrationsMapper, Migrati
         List<MigrationFields> migrationFields = new ArrayList<>();
 
         verify(migrations);
+        // 保存数据迁移配置
         saveOrUpdate(migrations);
 
         migrationDataSources.forEach(e -> e.setMigrationsId(migrations.getId()));
+        // 保存库配置
         migrationDataSourcesService.saveOrUpdateBatch(migrationDataSources);
 
         migrationDataSources.forEach(e -> {
@@ -89,6 +95,7 @@ public class MigrationsServiceImpl extends ServiceImpl<MigrationsMapper, Migrati
             migrationTables.addAll(migrationTablesList);
         });
         migrationTablesVerify(migrationTables);
+        // 保存表配置
         migrationTablesService.saveOrUpdateBatch(migrationTables);
 
         migrationTables.forEach(e -> {
@@ -100,7 +107,14 @@ public class MigrationsServiceImpl extends ServiceImpl<MigrationsMapper, Migrati
             migrationFields.addAll(migrationFieldsList);
         });
         migrationFieldConvert(migrationFields);
+        // 保存属性配置
         migrationFieldsService.saveOrUpdateBatch(migrationFields);
+    }
+
+    @Override
+    public IPage<Migrations> queryPage(Map<String, Object> param, Query query) {
+        QueryWrapper<Migrations> queryWrapper = Condition.getQueryWrapper(param, Migrations.class);
+        return page(Condition.getPage(query), queryWrapper);
     }
 
     private void migrationTablesVerify(List<MigrationTables> migrationTables) {
@@ -145,6 +159,12 @@ public class MigrationsServiceImpl extends ServiceImpl<MigrationsMapper, Migrati
             e.setPropertyName(StringUtil.upperCase(StringUtil.lineToHump(e.getFieldName())));
             e.setPkg(dbColumnType.getPkg());
             e.setPropertyType(dbColumnType.getType());
+            if (!StringUtil.isEmpty(e.getValue())) {
+                e.setValue(StringUtil.upperCase(StringUtil.lineToHump(e.getValue())));
+            }
+            if (StringUtil.isEmpty(e.getRemark())) {
+                e.setRemark(e.getPropertyName());
+            }
         });
     }
 }

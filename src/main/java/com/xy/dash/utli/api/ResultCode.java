@@ -5,6 +5,9 @@ package com.xy.dash.utli.api;//
 
 
 public enum ResultCode implements IResultCode {
+    /**
+     * 操作成功
+     */
     SUCCESS(200, "操作成功"),
     FAILURE(400, "业务异常"),
     UN_AUTHORIZED(401, "请求未授权"),
@@ -17,7 +20,8 @@ public enum ResultCode implements IResultCode {
     PARAM_MISS(400, "缺少必要的请求参数"),
     PARAM_TYPE_ERROR(400, "请求参数类型错误"),
     PARAM_BIND_ERROR(400, "请求参数绑定错误"),
-    PARAM_VALID_ERROR(400, "参数校验失败");
+    PARAM_VALID_ERROR(400, "参数校验失败"),
+    Not_Found_Factory(400, "未找到实现类");
 
     final int code;
     final String message;

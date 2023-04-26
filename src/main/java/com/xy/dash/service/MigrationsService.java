@@ -1,7 +1,11 @@
 package com.xy.dash.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.xy.dash.entity.Migrations;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xy.dash.utli.Query;
+
+import java.util.Map;
 
 /**
  * <p>
@@ -22,4 +26,6 @@ public interface MigrationsService extends IService<Migrations> {
      * 添加配置
      */
     void add(Migrations migrations);
+
+    IPage<Migrations> queryPage(Map<String, Object> param, Query query);
 }

@@ -1,20 +1,19 @@
 package com.xy.dash.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
 
 import java.sql.Blob;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
+import com.xy.dash.config.handler.AesEncrytHandler;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.ToString;
 
 @Data
-@TableName("xy_data_sources")
+@TableName(value = "xy_data_sources",autoResultMap = true)
 @ToString(callSuper = true)
 public class DataSources extends BaseEntity implements Serializable {
 
@@ -54,10 +53,11 @@ public class DataSources extends BaseEntity implements Serializable {
      * 密码
      */
     @ApiModelProperty("密码")
+    @TableField(typeHandler = AesEncrytHandler.class)
     private String password;
 
     /**
-     * 类型 0 mysql/1 sqlserver
+     * 类型 0 mysql/1 q
      */
     @ApiModelProperty("类型")
     private Integer type;

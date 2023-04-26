@@ -23,14 +23,17 @@ spring:
      testOnBorrow: false
      testOnReturn: false
      # 打开PSCache，并且指定每个连接上PSCache的大小
+  mvc:
+    async:
+      request-timeout: 30000
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
-#logging:
-#  level:
-#    com.xy.data.mapper: debug
+logging:
+  level:
+    com.xy.dash.mapper: debug
 
 
 swagger:

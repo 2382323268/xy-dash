@@ -10,10 +10,20 @@ import com.xy.data.util.DataPushConstant;
 import com.xy.data.util.SpringUtil;
 import com.xy.data.vo.DataCountVO;
 
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.math.BigDecimal;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.SQLException;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.CyclicBarrier;
@@ -27,11 +37,12 @@ import java.util.stream.Collectors;
  **/
 public class DataPushUtil<T, R> {
 
-    protected final String PATTERN = "[yyyy-MM-dd HH:mm:ss]" + "[yyyy/M/dd HH:mm:ss]" + "[yyyy/M/dd H:mm:ss]" + "[yyyy/M/dd H:m:ss]" + "[yyyy/M/d " +
-            "H:mm:ss]" + "[yyyy/M/dd H:m:s]" + "[yyyy/M/d HH:mm:ss]";
+    protected static final String PATTERN = "[yyyy-MM-dd HH:mm:ss]" + "[yyyy/M/dd HH:mm:ss]" + "[yyyy/M/dd H:mm:ss]" + "[yyyy/M/dd H:m:ss]" +
+            "[yyyy/M/d " +
+            "H:mm:ss]" + "[yyyy/M/dd H:m:s]" + "[yyyy/M/d HH:mm:ss]" + "[yyyy-MM-dd]" + "[HH:mm:ss]";
 
-    protected DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(PATTERN);
-    protected DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    protected static DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    protected static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(PATTERN);
 
     protected BaseMapper<T> baseMapper = null;
 
@@ -272,10 +283,498 @@ public class DataPushUtil<T, R> {
         return idType;
     }
 
-    protected final void throwException(DataCountVO dataCountVO){
+    protected final void throwException(DataCountVO dataCountVO) {
         if (dataCountVO.getThrowable() != null) {
             dataCountVO.getThrowable().printStackTrace();
             throw new RuntimeException("数据迁移失败！");
         }
+    }
+
+    protected static Long IntegerToLong(Integer v) {
+        if (v == null) {
+            return null;
+        }
+        return v.longValue();
+    }
+
+    protected static Float IntegerToFloat(Integer v) {
+        if (v == null) {
+            return null;
+        }
+        return v.floatValue();
+    }
+
+    protected static Double IntegerToDouble(Integer v) {
+        if (v == null) {
+            return null;
+        }
+        return v.doubleValue();
+    }
+
+    protected static Boolean IntegerToBoolean(Integer v) {
+        if (v == null) {
+            return null;
+        }
+        return v == 1;
+    }
+
+    protected static String IntegerToString(Integer v) {
+        if (v == null) {
+            return null;
+        }
+        return v.toString();
+    }
+
+    protected static BigDecimal IntegerToBigDecimal(Integer v) {
+        if (v == null) {
+            return null;
+        }
+        return BigDecimal.valueOf(v);
+    }
+
+    protected static Integer LongToInteger(Long v) {
+        if (v == null) {
+            return null;
+        }
+        return v.intValue();
+    }
+
+    protected static Float LongToFloat(Long v) {
+        if (v == null) {
+            return null;
+        }
+        return v.floatValue();
+    }
+
+    protected static Double LongToDouble(Long v) {
+        if (v == null) {
+            return null;
+        }
+        return v.doubleValue();
+    }
+
+
+    protected static Boolean LongToBoolean(Long v) {
+        if (v == null) {
+            return null;
+        }
+        return v == 1;
+    }
+
+    protected static String LongToString(Long v) {
+        if (v == null) {
+            return null;
+        }
+        return v.toString();
+    }
+
+    protected static Blob LongToBlob(Long v) {
+        if (v == null) {
+            return null;
+        }
+        byte[] array = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(v).array();
+        try {
+            return new SerialBlob(array);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    protected static LocalDate LongToLocalDate(Long v) {
+        if (v == null) {
+            return null;
+        }
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(v), ZoneId.systemDefault()).toLocalDate();
+    }
+
+    protected static LocalTime LongToLocalTime(Long v) {
+        if (v == null) {
+            return null;
+        }
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(v), ZoneId.systemDefault()).toLocalTime();
+    }
+
+    protected static LocalDateTime LongToLocalDateTime(Long v) {
+        if (v == null) {
+            return null;
+        }
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(v), ZoneId.systemDefault());
+    }
+
+    protected static byte[] LongToByte(Long v) {
+        if (v == null) {
+            return null;
+        }
+        return ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(v).array();
+    }
+
+    protected static BigDecimal LongToBigDecimal(Long v) {
+        if (v == null) {
+            return null;
+        }
+        return BigDecimal.valueOf(v);
+    }
+
+    protected static Integer FloatToInteger(Float v) {
+        if (v == null) {
+            return null;
+        }
+        return v.intValue();
+    }
+
+    protected static Long FloatToLong(Float v) {
+        if (v == null) {
+            return null;
+        }
+        return v.longValue();
+    }
+
+    protected static Double FloatToDouble(Float v) {
+        if (v == null) {
+            return null;
+        }
+        return v.doubleValue();
+    }
+
+    protected static Boolean FloatToBoolean(Float v) {
+        if (v == null) {
+            return null;
+        }
+        return v == 1;
+    }
+
+    protected static String FloatToString(Float v) {
+        if (v == null) {
+            return null;
+        }
+        return v.toString();
+    }
+
+    protected static Integer DoubleToInteger(Double v) {
+        if (v == null) {
+            return null;
+        }
+        return v.intValue();
+    }
+
+    protected static Long DoubleToLong(Double v) {
+        if (v == null) {
+            return null;
+        }
+        return v.longValue();
+    }
+
+    protected static Float DoubleToFloat(Double v) {
+        if (v == null) {
+            return null;
+        }
+        return v.floatValue();
+    }
+
+    protected static Boolean DoubleToBoolean(Double v) {
+        if (v == null) {
+            return null;
+        }
+        return v == 1;
+    }
+
+    protected static Integer BooleanToInteger(Boolean v) {
+        if (v == null) {
+            return null;
+        }
+        return v ? 1 : 0;
+    }
+
+    protected static Long BooleanToLong(Boolean v) {
+        if (v == null) {
+            return null;
+        }
+        return v ? 1L : 0;
+    }
+
+    protected static Float BooleanToFloat(Boolean v) {
+        if (v == null) {
+            return null;
+        }
+        return v ? 1F : 0;
+    }
+
+    protected static Double BooleanToDouble(Boolean v) {
+        if (v == null) {
+            return null;
+        }
+        return v ? 1D : 0;
+    }
+
+    protected static String BooleanToString(Boolean v) {
+        if (v == null) {
+            return null;
+        }
+        return v.toString();
+    }
+
+    protected static Integer StringToInteger(String v) {
+        if (v == null) {
+            return null;
+        }
+        return Integer.valueOf(v);
+    }
+
+    protected static Long StringToLong(String v) {
+        if (v == null) {
+            return null;
+        }
+        return Long.valueOf(v);
+    }
+
+    protected static Float StringToFloat(String v) {
+        if (v == null) {
+            return null;
+        }
+        return Float.valueOf(v);
+    }
+
+    protected static Double StringToDouble(String v) {
+        if (v == null) {
+            return null;
+        }
+        return Double.valueOf(v);
+    }
+
+    protected static Boolean StringToBoolean(String v) {
+        if (v == null) {
+            return null;
+        }
+        return Boolean.valueOf(v);
+    }
+
+    protected static Blob StringToBlob(String v) {
+        if (v == null) {
+            return null;
+        }
+        try {
+            return new SerialBlob(v.getBytes(StandardCharsets.UTF_8));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    protected static Clob StringToClob(String v) {
+        if (v == null) {
+            return null;
+        }
+        try {
+            return new SerialClob(v.toCharArray());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    protected static LocalDate StringToLocalDate(String v) {
+        if (v == null) {
+            return null;
+        }
+
+        return LocalDate.parse(v, dateTimeFormatter);
+    }
+
+    protected static LocalTime StringToLocalTime(String v) {
+        if (v == null) {
+            return null;
+        }
+
+        return LocalTime.parse(v, dateTimeFormatter);
+    }
+
+    protected static BigDecimal StringToBigDecimal(String v) {
+        if (v == null) {
+            return null;
+        }
+
+        return new BigDecimal(v);
+    }
+
+
+    protected static byte[] StringToByte(String v) {
+        if (v == null) {
+            return null;
+        }
+
+        return v.getBytes(StandardCharsets.UTF_8);
+    }
+
+
+    protected static LocalDateTime StringToLocalDateTime(String v) {
+        if (v == null) {
+            return null;
+        }
+
+        return LocalDateTime.parse(v, dateTimeFormatter);
+    }
+
+    protected static byte[] BlobToByte(Blob v) {
+        if (v == null) {
+            return null;
+        }
+        BufferedInputStream is = null;
+        try {
+            is = new BufferedInputStream(v.getBinaryStream());
+            byte[] bytes = new byte[(int) v.length()];
+            int len = bytes.length;
+            int offset = 0;
+            int read = 0;
+
+            while (offset < len && (read = is.read(bytes, offset, len - offset)) >= 0) {
+                offset += read;
+            }
+            return bytes;
+        } catch (Exception e) {
+            return null;
+        } finally {
+            try {
+                is.close();
+                is = null;
+            } catch (IOException e) {
+                return null;
+            }
+        }
+    }
+
+    protected static String BlobToString(Blob v) {
+        if (v == null) {
+            return null;
+        }
+        return new String(BlobToByte(v));
+    }
+
+    protected static Long LocalDateToLong(LocalDate v) {
+        if (v == null) {
+            return null;
+        }
+        return v.atTime(LocalTime.MIN).toInstant(ZoneOffset.UTC).toEpochMilli();
+    }
+
+    protected static String LocalDateToString(LocalDate v) {
+        if (v == null) {
+            return null;
+        }
+        return v.format(dateTimeFormatter);
+    }
+
+
+    protected static LocalDateTime LocalDateToLocalDateTime(LocalDate v) {
+        if (v == null) {
+            return null;
+        }
+        return v.atTime(LocalTime.now());
+    }
+
+    protected static String LocalTimeToString(LocalTime v) {
+        if (v == null) {
+            return null;
+        }
+        return v.format(dateTimeFormatter);
+    }
+
+
+    protected static LocalDateTime LocalTimeToLocalDateTime(LocalTime v) {
+        if (v == null) {
+            return null;
+        }
+        return LocalDateTime.of(LocalDate.now(), v);
+    }
+
+    protected static Long LocalDateTimeToLong(LocalDateTime v) {
+        if (v == null) {
+            return null;
+        }
+        return v.toInstant(ZoneOffset.UTC).toEpochMilli();
+    }
+
+
+    protected static String LocalDateTimeToString(LocalDateTime v) {
+        if (v == null) {
+            return null;
+        }
+        return v.format(df);
+    }
+
+    protected static LocalDate LocalDateTimeToLocalDate(LocalDateTime v) {
+        if (v == null) {
+            return null;
+        }
+        return v.toLocalDate();
+    }
+
+    protected static LocalTime LocalDateTimeToLocalTime(LocalDateTime v) {
+        if (v == null) {
+            return null;
+        }
+        return v.toLocalTime();
+    }
+
+    protected static Integer BigDecimalToInteger(BigDecimal v) {
+        if (v == null) {
+            return null;
+        }
+        return v.intValue();
+    }
+
+    protected static Long BigDecimalToLong(BigDecimal v) {
+        if (v == null) {
+            return null;
+        }
+        return v.longValue();
+    }
+
+    protected static Float BigDecimalToFloat(BigDecimal v) {
+        if (v == null) {
+            return null;
+        }
+        return v.floatValue();
+    }
+
+    protected static Double BigDecimalToDouble(BigDecimal v) {
+        if (v == null) {
+            return null;
+        }
+        return v.doubleValue();
+    }
+
+    protected static Boolean BigDecimalToBoolean(BigDecimal v) {
+        if (v == null) {
+            return null;
+        }
+        return v.compareTo(BigDecimal.valueOf(1)) == 0;
+    }
+
+    protected static String BigDecimalToString(BigDecimal v) {
+        if (v == null) {
+            return null;
+        }
+        return v.toString();
+    }
+
+
+    protected static String ByteToString(byte[] v) {
+        if (v == null) {
+            return null;
+        }
+        return new String(v);
+    }
+
+    protected static Blob ByteToBlob(byte[] v) {
+        if (v == null) {
+            return null;
+        }
+        try {
+            return new SerialBlob(v);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

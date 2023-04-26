@@ -89,7 +89,7 @@ public class MigrationTablesServiceImpl extends ServiceImpl<MigrationTablesMappe
             }).findFirst();
             if (first.isPresent()) {
                 e.setSourceName(first.get().getEntityName());
-                String handlerName = e.getEntityName().concat("By").concat(first.get().getEntityName()).concat("Handler");
+                String handlerName = first.get().getEntityName().concat("To").concat(e.getEntityName()).concat("Handler");
                 e.setHandlerName(handlerName);
                 e.setLowerHandlerName(StringUtil.lowerCase(handlerName));
             }

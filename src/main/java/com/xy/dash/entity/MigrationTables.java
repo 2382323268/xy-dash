@@ -11,7 +11,9 @@ import lombok.Data;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.ToString;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Data
@@ -62,6 +64,8 @@ public class MigrationTables extends BaseEntity implements Serializable {
 
 
     @TableField(exist = false)
+    @NotEmpty(message = "字段配置不能为空")
+    @Valid
     private List<MigrationFields> migrationFields;
 
     @ApiModelProperty("数据库类型")

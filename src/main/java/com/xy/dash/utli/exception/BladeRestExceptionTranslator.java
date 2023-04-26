@@ -68,8 +68,7 @@ public class BladeRestExceptionTranslator {
 
     private R handleError(BindingResult result) {
         FieldError error = result.getFieldError();
-        String message = String.format("%s:%s", error.getField(), error.getDefaultMessage());
-        return R.fail(ResultCode.PARAM_BIND_ERROR, message);
+        return R.fail(ResultCode.PARAM_BIND_ERROR, error.getDefaultMessage());
     }
 
     @ExceptionHandler({ConstraintViolationException.class})

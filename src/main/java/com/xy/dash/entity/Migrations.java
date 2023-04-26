@@ -11,6 +11,9 @@ import lombok.Data;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.ToString;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Data
@@ -25,6 +28,10 @@ public class Migrations extends BaseEntity implements Serializable {
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
+
+    @ApiModelProperty("名称")
+    @NotBlank(message = "名称不能为空")
+    private String name;
 
     /**
      * 线程数量
@@ -63,5 +70,7 @@ public class Migrations extends BaseEntity implements Serializable {
     private Boolean isDel;
 
     @TableField(exist = false)
+    @Valid
+    @NotEmpty(message = "库配置不能为空")
     private List<MigrationDataSources> migrationDataSources;
 }

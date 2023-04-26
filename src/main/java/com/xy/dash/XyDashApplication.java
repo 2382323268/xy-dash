@@ -33,7 +33,7 @@ public class XyDashApplication {
     public static void main(String[] args) {
         SpringApplication.run(XyDashApplication.class, args);
         MigrationsService bean = SpringUtil.getBean(MigrationsService.class);
-        bean.generatingCode(6L);
+        bean.generatingCode(116L);
 //        Migrations migrations = new Migrations();
 //        migrations.setPort(9008);
 //        migrations.setStartThread(true);

@@ -1,4 +1,4 @@
-package com.xy.dash.utli;
+package com.xy.dash.config.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
@@ -31,7 +31,7 @@ public class FieldObjectHandler implements MetaObjectHandler {
 
     @Override
     public void insertFill(MetaObject metaObject) {
-        log.info("start insert fill ...."+ JSON.toJSONString(metaObject));
+//        log.info("start insert fill ...."+ JSON.toJSONString(metaObject));
         this.setFieldValByName(CREATE_TIME, LocalDateTime.now(), metaObject);
         this.setFieldValByName(MODIFIED_TIME, LocalDateTime.now(), metaObject);
         this.setFieldValByName(CREATER, getUser(), metaObject);

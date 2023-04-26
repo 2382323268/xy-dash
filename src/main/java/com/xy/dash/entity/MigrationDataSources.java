@@ -11,7 +11,9 @@ import lombok.Data;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.ToString;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -65,6 +67,8 @@ public class MigrationDataSources extends BaseEntity implements Serializable {
     private Integer type;
 
     @TableField(exist = false)
+    @NotEmpty(message = "表配置不能为空")
+    @Valid
     private List<MigrationTables> migrationTables;
 
 }

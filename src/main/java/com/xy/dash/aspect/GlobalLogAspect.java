@@ -39,7 +39,11 @@ public class GlobalLogAspect {
     private Object Handler(ProceedingJoinPoint pjp) throws Throwable {
         Signature signature = pjp.getSignature();
         MethodSignature methodSignature = (MethodSignature) signature;
-        GlobalLog annotation = methodSignature.getMethod().getAnnotation(GlobalLog.class);
+        GlobalLog annotation;
+        annotation = methodSignature.getMethod().getAnnotation(GlobalLog.class);
+        if (annotation == null) {
+            annotation = pjp.getTarget().getClass().getAnnotation(GlobalLog.class);
+        }
         try {
             log.info("{} [{}.{}], 入参: [{}]", annotation.value(), signature.getDeclaringTypeName(), signature.getName(), flatArgs(pjp));
             long startMs = System.currentTimeMillis();
