@@ -63,6 +63,11 @@ public class MigrationFields extends BaseEntity implements Serializable {
      */
     private String value;
 
+    /**
+     * 字段对应值
+     */
+    private String valueType;
+
     private String valueMap;
 
     /**

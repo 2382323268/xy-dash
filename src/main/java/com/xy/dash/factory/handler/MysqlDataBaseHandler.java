@@ -94,6 +94,9 @@ public class MysqlDataBaseHandler implements DataBaseHandler {
             while (primaryKeyResultSet.next()) {
                 key = primaryKeyResultSet.getString("COLUMN_NAME");
             }
+            if (key == null) {
+                key = "";
+            }
             while (tables.next()) {
                 String typeName = tables.getString("TYPE_NAME");
                 FieldVO build = FieldVO.builder()

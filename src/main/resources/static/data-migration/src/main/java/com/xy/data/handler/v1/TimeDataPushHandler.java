@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 /**
  * @Author: xiangwei
  * @Date: 2022/10/31 15:54
- * @Description 根据创建时间迁移数据
+ * @Description 根据创建时间数据迁移
  **/
 @Slf4j
 public abstract class TimeDataPushHandler<T, R> extends DataPushHandler<T, R> {
@@ -44,7 +44,7 @@ public abstract class TimeDataPushHandler<T, R> extends DataPushHandler<T, R> {
 
             if (selectData == null || selectData.size() == 0) {
                 poll = false;
-                log.info("迁移数据:" + msg + "完成, 一共添加{}条记录, 删除重复数据{}条", saveAll, deleteAll);
+                log.info("数据迁移:" + msg + "完成, 一共添加{}条记录, 删除重复数据{}条", saveAll, deleteAll);
                 return;
             }
             // 单线程或者多线程
@@ -89,7 +89,7 @@ public abstract class TimeDataPushHandler<T, R> extends DataPushHandler<T, R> {
             index++;
             saveAll += dataCountVO.getSave();
             deleteAll += dataCountVO.getDelete();
-            log.info("迁移数据: " + msg + ", 第{}轮, 结束时间 start = {}", index, df.format(start));
+            log.info("数据迁移: " + msg + ", 第{}轮, 结束时间 start = {}", index, df.format(start));
         }
     }
 
@@ -131,6 +131,8 @@ public abstract class TimeDataPushHandler<T, R> extends DataPushHandler<T, R> {
 
         //多线程处理
         List<Future<DataCountVO>> list = new ArrayList<>();
+        List<Throwable> throwables = new ArrayList<>();
+
         for (int i = 0; i < selectData.size(); i = i + count) {
             int finalI = i;
             list.add(pushExecutor.submit(() -> {
@@ -145,10 +147,16 @@ public abstract class TimeDataPushHandler<T, R> extends DataPushHandler<T, R> {
         }
         for (Future<DataCountVO> integerFuture : list) {
             DataCountVO dataCountVO = integerFuture.get();
-            throwException(dataCountVO);
+
+            if (dataCountVO.getThrowable() != null) {
+                throwables.add(dataCountVO.getThrowable());
+                continue;
+            }
+
             save += dataCountVO.getSave();
             delete += dataCountVO.getDelete();
         }
+        throwException(throwables);
         return DataCountVO.builder().save(save).delete(delete).build();
     }
 }

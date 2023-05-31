@@ -2,14 +2,10 @@ package com.xy.dash.controller;
 
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.xy.dash.entity.DataSources;
 import com.xy.dash.entity.Migrations;
 import com.xy.dash.utli.Query;
 import com.xy.dash.utli.api.R;
-import com.xy.dash.vo.DataSourcesReq;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.stereotype.Controller;
 import com.xy.dash.service.MigrationsService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,6 +32,12 @@ public class MigrationsController {
 
     @Autowired
     private MigrationsService migrationsService;
+
+    @GetMapping("/{id}")
+    @ApiOperation(value = "详情")
+    public Migrations details(@PathVariable Long id) {
+        return migrationsService.details(id);
+    }
 
     @GetMapping("")
     @ApiOperation(value = "查询")

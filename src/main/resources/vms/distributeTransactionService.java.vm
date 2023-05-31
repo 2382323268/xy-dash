@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @Author: xiangwei
@@ -118,10 +119,13 @@ public class DistributeTransactionService<T> {
         if (ObjectUtils.isNotEmpty(method)) {
             try {
                 return (int) method.invoke(bean, t);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
             } catch (InvocationTargetException e) {
                 e.printStackTrace();
+                String msg = Optional.ofNullable(e.getTargetException()).map(Throwable::getCause).map(Throwable::getMessage).orElse(e.getMessage());
+                throw new RuntimeException(msg);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e.getMessage());
             }
         }
         throw new RuntimeException("未找到对应的插入数据源！");

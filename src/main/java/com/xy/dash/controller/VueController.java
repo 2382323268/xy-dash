@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class VueController {
 
-//    @GetMapping("/*")
+//    @GetMapping("/api/swagger")
 //    public String vue(){
-//        return "vue/index.html";
+//        return "swagger-ui.html";
 //    }
 }

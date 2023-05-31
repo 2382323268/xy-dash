@@ -12,7 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 #foreach(${templatesFields} in ${templatesTable.templatesFields})
 #if($!{templatesFields.pkg})
-import ${templatesFields.pkg}
+import ${templatesFields.pkg};
 #end
 #end
 #if(${templatesTable.migration})

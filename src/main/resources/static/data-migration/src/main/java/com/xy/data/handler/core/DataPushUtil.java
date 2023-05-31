@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.xy.data.util.DataPushConstant;
 import com.xy.data.util.SpringUtil;
 import com.xy.data.vo.DataCountVO;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
  * @Date: 2023/1/6 14:33
  * @Description
  **/
+@Slf4j
 public class DataPushUtil<T, R> {
 
     protected static final String PATTERN = "[yyyy-MM-dd HH:mm:ss]" + "[yyyy/M/dd HH:mm:ss]" + "[yyyy/M/dd H:mm:ss]" + "[yyyy/M/dd H:m:ss]" +
@@ -283,11 +285,15 @@ public class DataPushUtil<T, R> {
         return idType;
     }
 
-    protected final void throwException(DataCountVO dataCountVO) {
-        if (dataCountVO.getThrowable() != null) {
-            dataCountVO.getThrowable().printStackTrace();
-            throw new RuntimeException("数据迁移失败！");
+    protected final void throwException(List<Throwable> throwables) {
+        throwables.stream().map(Throwable::getMessage).distinct().forEach(e -> {
+            log.error("数据迁移异常, 【异常】 = {}", e);
+        });
+        if (throwables.size() > 0) {
+            throwables.get(0).printStackTrace();
+            throw new RuntimeException("异常结束, 【异常】 = " + throwables.get(0).getMessage());
         }
+
     }
 
     protected static Long IntegerToLong(Integer v) {

@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 /**
  * @Author: xiangwei
  * @Date: 2022/10/31 15:15
- * @Description 分页迁移数据
+ * @Description 分页数据迁移
  **/
 @Slf4j
 @Deprecated
@@ -81,9 +81,9 @@ public abstract class PageDataPushHandler<T, R> extends DataPushHandler<T, R> {
             index++;
             saveAll += dataCountVO.getSave();
             deleteAll += dataCountVO.getDelete();
-            log.info("迁移数据: " + msg + ", 第{}轮结束", index);
+            log.info("数据迁移: " + msg + ", 第{}轮结束", index);
         }
-        log.info("迁移数据:" + msg + "完成, 一共添加{}条记录, 删除重复数据{}条", saveAll, deleteAll);
+        log.info("数据迁移:" + msg + "完成, 一共添加{}条记录, 删除重复数据{}条", saveAll, deleteAll);
 
     }
 
@@ -114,6 +114,8 @@ public abstract class PageDataPushHandler<T, R> extends DataPushHandler<T, R> {
         int delete = 0;
         //多线程处理
         List<Future<DataCountVO>> list = new ArrayList<>();
+        List<Throwable> throwables = new ArrayList<>();
+
         for (Integer i = 0; i < threadCount; i++) {
             list.add(pushExecutor.submit(() -> {
                 try {
@@ -126,10 +128,16 @@ public abstract class PageDataPushHandler<T, R> extends DataPushHandler<T, R> {
         }
         for (Future<DataCountVO> integerFuture : list) {
             DataCountVO dataCountVO = integerFuture.get();
-            throwException(dataCountVO);
+
+            if (dataCountVO.getThrowable() != null) {
+                throwables.add(dataCountVO.getThrowable());
+                continue;
+            }
+
             save += dataCountVO.getSave();
             delete += dataCountVO.getDelete();
         }
+        throwException(throwables);
         return DataCountVO.builder().save(save).delete(delete).build();
     }
 }

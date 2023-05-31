@@ -81,6 +81,6 @@ public class DataSourcesController {
     @PostMapping("/removes")
     @ApiOperation(value = "逻辑删除")
     public R remove(@ApiParam(value = "主键集合", required = true) @RequestParam String ids) {
-        return R.status(dataSourcesService.deleteLogic(Arrays.asList(ids.split(","))));
+        return R.status(dataSourcesService.deleteByids(Arrays.asList(ids.split(","))));
     }
 }

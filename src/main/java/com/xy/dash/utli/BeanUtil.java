@@ -10,6 +10,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 public class BeanUtil extends BeanUtils {
@@ -41,6 +42,25 @@ public class BeanUtil extends BeanUtils {
             copyProperties((Object)source, (Object)to);
             return to;
         }
+    }
+
+    public static Map<String, String> toStringMap(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        Map<String, String> map = new HashMap<>();
+
+        Field[] declaredFields = obj.getClass().getDeclaredFields();
+        for (Field field : declaredFields) {
+            field.setAccessible(true);
+            try {
+                map.put(field.getName(), field.get(obj) == null ? null : field.get(obj).toString());
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return map;
     }
 
     public static <T> List<T> copyProperties(@Nullable Collection<?> sourceList, Class<T> targetClazz) throws BeansException {

@@ -23,60 +23,45 @@ public class ${templatesTable.handlerName} extends PageAndKeyDataPushV3Handler<$
                 null);
     }
 
-    private String getFailedMsg(Integer status) {
-        switch (status) {
-            case 1:
-                return "您的推荐已被风控系统拦截，正在等待人工审核。";
-            case 3:
-                return "您的推荐已被风控系统识别存在刷分情节，推荐无效。";
-            case 4:
-                return "您的账号涉嫌恶意刷取平台积分，进行不当获利。";
-            case 5:
-                return "推荐积分已达上限。";
-            case 7:
-                return "该用户已被其他人推荐成功。";
-            case 8:
-                return "该亲友早于推荐时间已注册，故推荐无效。";
-            case 9:
-                return "该亲友未注册。";
-            default:
-                return "";
-        }
-
-    }
-
-    private String getIdentity(String identity) {
-        if (identity == null) {
-            return null;
-        }
-        if (identity.contains("会员")) {
-            return "1";
-        }
-        if (identity.contains("员工")) {
-            return "2";
-        }
-        if (Arrays.asList("业户", "业主", "住户", "租户").contains(identity)) {
-            return "3";
-        }
-        if (identity.contains("历史业主")) {
-            return "4";
-        }
-        return null;
-    }
-
     @Override
     protected List<${templatesTable.entityName}> getData(List<${templatesTable.sourceName}> data) {
         List<${templatesTable.entityName}> ${templatesTable.lowerEntityName}List = new ArrayList();
         data.forEach(e -> {
             ${templatesTable.entityName} ${templatesTable.lowerEntityName} = ${templatesTable.entityName}.builder()
     #foreach(${templatesFields} in ${templatesTable.templatesFields})
+        #if("$!templatesFields.propertyType" == "byte[]")
+            #set($propertyType="Byte")
+        #else
+            #set($propertyType=${templatesFields.propertyType})
+        #end
+        #if("$!templatesFields.valueType" == "byte[]")
+            #set($valueType="Byte")
+        #else
+            #set($valueType=${templatesFields.valueType})
+        #end
+        #if("$!{templatesFields.propertyType}" != "String")
+            #set($toValue="StringTo"+${propertyType}+"("""+${templatesFields.defaulted}+""")")
+        #else
+            #set($toValue=""""+${templatesFields.defaulted}+"""")
+        #end
+        #if("$!{templatesFields.propertyType}" != "$!templatesFields.valueType")
+            #set($to=${valueType}+"To"+${propertyType}+"(e.get"+${templatesFields.value}+"())")
+        #else
+            #set($to="e.get"+${templatesFields.value}+"()")
+        #end
         #if("$!templatesFields.valueMap" == "")
-            #if("$!{templatesFields.value}" == "")
-                #set($getEntity= ${templatesFields.propertyName})
-            #else
-                #set($getEntity= ${templatesFields.value})
+        #else
+        #end
+        #if("$!{templatesFields.value}" == "")
+            #if("$!{templatesFields.defaulted}" != "")
+                    .${templatesFields.lowerPropertyName}($toValue)
             #end
-                    .${templatesFields.lowerPropertyName}(e.get${getEntity}())
+        #else
+            #if("$!{templatesFields.defaulted}" != "")
+                    .${templatesFields.lowerPropertyName}($to == null ? $toValue : $to)
+            #else
+                    .${templatesFields.lowerPropertyName}($to)
+            #end
         #end
     #end
                     .build();
@@ -99,5 +84,10 @@ public class ${templatesTable.handlerName} extends PageAndKeyDataPushV3Handler<$
     @Override
     protected void saveAfterExtension(List<${templatesTable.sourceName}> r, List<${templatesTable.entityName}> t) {
 
+    }
+
+    @Override
+    public Integer getPosition() {
+        return ${templatesTable.position};
     }
 }

@@ -21,13 +21,17 @@ public class StringUtil extends StringUtils {
      * @return
      */
     public static String humpToLine(String str) {
+        if (isBlank(str)) {
+            return null;
+        }
         Matcher matcher = humpPattern.matcher(str);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             matcher.appendReplacement(sb, "_" + matcher.group(0).toUpperCase());
         }
         matcher.appendTail(sb);
-        return sb.toString().toLowerCase();
+        String value = sb.toString().toLowerCase();
+        return StringUtils.startsWith(value, "_") ? value.substring(1, value.length()) : value;
     }
 
     /**
@@ -48,6 +52,7 @@ public class StringUtil extends StringUtils {
 
     /**
      * 首位大写
+     *
      * @param str
      * @return
      */
@@ -61,6 +66,7 @@ public class StringUtil extends StringUtils {
 
     /**
      * 首位小写
+     *
      * @param str
      * @return
      */

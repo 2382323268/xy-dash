@@ -31,4 +31,6 @@ public interface DataSourcesService extends IService<DataSources> {
     Boolean deleteLogic(List<String> ids);
 
     Boolean updateById(DataSourcesReq dataSourcesReq);
+
+    Boolean deleteByids(List<String> asList);
 }

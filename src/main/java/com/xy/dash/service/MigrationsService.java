@@ -28,4 +28,6 @@ public interface MigrationsService extends IService<Migrations> {
     void add(Migrations migrations);
 
     IPage<Migrations> queryPage(Map<String, Object> param, Query query);
+
+    Migrations details(Long id);
 }

@@ -11,6 +11,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -75,7 +76,7 @@ public abstract class DataPushHandler<T, R> extends DataPushUtil<T, R> {
         String rDs = rClass.getDeclaredAnnotation(DS.class).value();
         String rName = rClass.getDeclaredAnnotation(TableName.class).value();
         StringBuilder msg = new StringBuilder();
-        msg.append("数据源:").append(tDs).append(" 表名:").append(tName).append("迁移到---").append("数据源:").append(rDs).append(" 表名:").append(rName);
+        msg.append("数据源[").append(rDs).append("] 表名[").append(rName).append("]---迁移到---").append("数据源[").append(tDs).append("] 表名[").append(tName).append("]");
         try {
             long currentTimeMillis = System.currentTimeMillis();
             pushData(msg.toString(), start, end);
@@ -222,9 +223,14 @@ public abstract class DataPushHandler<T, R> extends DataPushUtil<T, R> {
         getDsName();
     }
 
+    public Integer getPosition() {
+        return 0;
+    }
+
     public static void run() {
         Long start = System.currentTimeMillis();
         List<DataPushHandler> beanList = SpringUtil.getBeanList(DataPushHandler.class);
+        beanList = beanList.stream().sorted(Comparator.comparing(DataPushHandler::getPosition)).collect(Collectors.toList());
         beanList.forEach(DataPushHandler::push);
         log.info("一共耗时: {}", (System.currentTimeMillis() - start) / 1000 + "s");
         log.info("正在停止服务器！");

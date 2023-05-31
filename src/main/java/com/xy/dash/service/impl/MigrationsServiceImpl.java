@@ -3,6 +3,7 @@ package com.xy.dash.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.xy.dash.aspect.GlobalLog;
 import com.xy.dash.converts.DataSourceConvert;
 import com.xy.dash.entity.*;
@@ -117,6 +118,43 @@ public class MigrationsServiceImpl extends ServiceImpl<MigrationsMapper, Migrati
         return page(Condition.getPage(query), queryWrapper);
     }
 
+    @Override
+    public Migrations details(Long id) {
+        Migrations migrations = getById(id);
+        // 数据源数据
+        List<MigrationDataSources> migrationDataSourcesList = migrationDataSourcesService.list(Wrappers.<MigrationDataSources>lambdaQuery()
+                .eq(MigrationDataSources::getMigrationsId, id));
+        List<Long> migrationDataSourceIds = migrationDataSourcesList.stream().map(MigrationDataSources::getId).collect(Collectors.toList());
+        List<Long> sourceIds = migrationDataSourcesList.stream().map(MigrationDataSources::getSourceId).collect(Collectors.toList());
+        Map<Long, Integer> map = dataSourcesMapper.selectBatchIds(sourceIds).stream().collect(Collectors.toMap(DataSources::getId,
+                DataSources::getType));
+
+        // 表数据
+        List<MigrationTables> migrationTables = migrationTablesService.list(Wrappers.<MigrationTables>lambdaQuery()
+                .in(MigrationTables::getMigrationSourcesId, migrationDataSourceIds));
+        List<Long> migrationTableIds = migrationTables.stream().map(MigrationTables::getId).collect(Collectors.toList());
+        // 字段数据
+        List<MigrationFields> migrationFieldsList = migrationFieldsService.list(Wrappers.<MigrationFields>lambdaQuery().in(MigrationFields::getTableId, migrationTableIds));
+
+        migrationDataSourcesList.forEach(e -> {
+            List<MigrationTables> migrationTablesList = migrationTables.stream().filter(v -> v.getMigrationSourcesId().equals(e.getId())).collect(Collectors.toList());
+            e.setMigrationTables(migrationTablesList);
+            e.setType(map.get(e.getSourceId()));
+            e.getMigrationTables().forEach(v -> {
+                List<MigrationFields> migrationFields =
+                        migrationFieldsList.stream().filter(x -> x.getTableId().equals(v.getId())).map(x -> {
+                            x.setValue(StringUtil.humpToLine(x.getValue()));
+                            return x;
+                        }).collect(Collectors.toList());
+
+                v.setMigrationFields(migrationFields);
+                v.setType(e.getType());
+            });
+        });
+        migrations.setMigrationDataSources(migrationDataSourcesList);
+        return migrations;
+    }
+
     private void migrationTablesVerify(List<MigrationTables> migrationTables) {
         List<Integer> collect = migrationTables.stream().filter(MigrationTables::getMigration).map(e -> {
             Integer position = e.getPosition();
@@ -162,7 +200,7 @@ public class MigrationsServiceImpl extends ServiceImpl<MigrationsMapper, Migrati
             if (!StringUtil.isEmpty(e.getValue())) {
                 e.setValue(StringUtil.upperCase(StringUtil.lineToHump(e.getValue())));
             }
-            if (StringUtil.isEmpty(e.getRemark())) {
+            if (StringUtil.isBlank(e.getRemark())) {
                 e.setRemark(e.getPropertyName());
             }
         });

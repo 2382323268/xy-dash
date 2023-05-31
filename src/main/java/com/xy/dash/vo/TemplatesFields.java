@@ -47,6 +47,8 @@ public class TemplatesFields {
      */
     private String pkg;
 
+    private String valueType;
+
     /**
      * 字段对应值
      */

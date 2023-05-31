@@ -71,4 +71,8 @@ public class MigrationTables extends BaseEntity implements Serializable {
     @ApiModelProperty("数据库类型")
     @TableField(exist = false)
     private Integer type;
+
+    @ApiModelProperty("下标")
+    @NotNull(message = "下标不能为空")
+    private Integer random;
 }

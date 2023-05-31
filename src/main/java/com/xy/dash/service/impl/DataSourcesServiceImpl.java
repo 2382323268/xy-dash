@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.xy.dash.entity.DataSources;
+import com.xy.dash.entity.MigrationDataSources;
 import com.xy.dash.mapper.DataSourcesMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xy.dash.service.DataSourcesService;
+import com.xy.dash.service.MigrationDataSourcesService;
 import com.xy.dash.utli.BeanUtil;
 import com.xy.dash.utli.Condition;
 import com.xy.dash.utli.ObjectUtils;
@@ -16,6 +18,7 @@ import com.xy.dash.utli.exception.ServiceException;
 import com.xy.dash.vo.AdminMenuVO;
 import com.xy.dash.vo.DataSourcesReq;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +37,9 @@ import java.util.Map;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class DataSourcesServiceImpl extends ServiceImpl<DataSourcesMapper, DataSources> implements DataSourcesService {
+
+    @Autowired
+    private MigrationDataSourcesService migrationDataSourcesService;
 
     @Override
     public IPage<DataSources> queryPage(Map<String, Object> param, Query query) {
@@ -61,6 +67,15 @@ public class DataSourcesServiceImpl extends ServiceImpl<DataSourcesMapper, DataS
     public Boolean updateById(DataSourcesReq dataSourcesReq) {
         verify(dataSourcesReq);
         return updateById(BeanUtil.copyProperties(dataSourcesReq, DataSources.class));
+    }
+
+    @Override
+    public Boolean deleteByids(List<String> ids) {
+        int count = migrationDataSourcesService.count(Wrappers.<MigrationDataSources>lambdaQuery().eq(MigrationDataSources::getSourceId, ids));
+        if(count > 0){
+            throw new ServiceException("该数据源配置与数据源迁移配置关联，无法删除！");
+        }
+        return deleteLogic(ids);
     }
 
     private void verify(DataSourcesReq dataSourcesReq) {
