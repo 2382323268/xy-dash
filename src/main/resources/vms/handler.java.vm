@@ -1,14 +1,38 @@
 package com.xy.data.handler;
 
+#foreach(${templatesJoinTables} in ${templatesTable.distinctTemplatesJoinTables})
+import com.xy.data.entity.${templatesJoinTables.uniqueName}.${templatesJoinTables.entityName};
+import com.xy.data.service.${templatesJoinTables.uniqueName}.${templatesJoinTables.serviceName};
+#end
 import com.xy.data.entity.${templatesTable.sourceUniqueName}.${templatesTable.sourceName};
 import com.xy.data.entity.${templatesTable.uniqueName}.${templatesTable.entityName};
 import com.xy.data.handler.v3.PageAndKeyDataPushV3Handler;
+import com.xy.data.handler.v3.PageAndTimeDataPushV3Handler;
+import com.xy.data.handler.v3.PageDataPushV3Handler;
 import com.xy.data.mapper.${templatesTable.uniqueName}.${templatesTable.mapperName};
+import com.xy.data.handler.core.DataPushUtil;
 import com.xy.data.util.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
+import com.xy.data.util.Condition;
+import java.util.Arrays;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
+import java.time.LocalDateTime;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Year;
+import java.math.BigDecimal;
+import java.time.YearMonth;
+import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author: xiangwei
@@ -17,18 +41,35 @@ import java.util.*;
  **/
 @Component
 @Slf4j
-public class ${templatesTable.handlerName} extends PageAndKeyDataPushV3Handler<${templatesTable.entityName}, ${templatesTable.sourceName}> {
+#if(${templatesTable.migrationType} == "1")
+    #set($handlername="PageAndKeyDataPushV3Handler")
+    #elseif(${templatesTable.migrationType} == "2")
+        #set($handlername="PageAndTimeDataPushV3Handler")
+#elseif(${templatesTable.migrationType} == "3")
+    #set($handlername="PageDataPushV3Handler")
+#end
+public class ${templatesTable.handlerName} extends ${handlername}<${templatesTable.entityName}, ${templatesTable.sourceName}> {
     ${templatesTable.handlerName}() {
-        super(${templatesTable.entityName}.class, ${templatesTable.sourceName}.class, ${templatesTable.mapperName}.class,  null,
+        super(${templatesTable.entityName}.class, ${templatesTable.sourceName}.class, ${templatesTable.mapperName}.class, null,
                 null);
     }
 
+#foreach(${templatesJoinTables} in ${templatesTable.distinctTemplatesJoinTables})
+    @Autowired
+    private ${templatesJoinTables.serviceName} ${templatesJoinTables.lowerServiceName};
+
+#end
     @Override
     protected List<${templatesTable.entityName}> getData(List<${templatesTable.sourceName}> data) {
         List<${templatesTable.entityName}> ${templatesTable.lowerEntityName}List = new ArrayList();
+#foreach(${templatesJoinTables} in ${templatesTable.templatesJoinTables})
+        Map<${templatesJoinTables.fieldType}, List<${templatesJoinTables.entityName}>> ${templatesJoinTables.lowerEntityName}By${templatesJoinTables.field}Map = get${templatesJoinTables.entityName}By${templatesJoinTables.field}Map(data);
+    #end
+
         data.forEach(e -> {
             ${templatesTable.entityName} ${templatesTable.lowerEntityName} = ${templatesTable.entityName}.builder()
     #foreach(${templatesFields} in ${templatesTable.templatesFields})
+        #if("$!templatesFields.valueMap" == "")
         #if("$!templatesFields.propertyType" == "byte[]")
             #set($propertyType="Byte")
         #else
@@ -49,22 +90,61 @@ public class ${templatesTable.handlerName} extends PageAndKeyDataPushV3Handler<$
         #else
             #set($to="e.get"+${templatesFields.value}+"()")
         #end
-        #if("$!templatesFields.valueMap" == "")
-        #else
-        #end
         #if("$!{templatesFields.value}" == "")
             #if("$!{templatesFields.defaulted}" != "")
                     .${templatesFields.lowerPropertyName}($toValue)
             #end
+            #if(${templatesFields.status} == 1 && "${templatesTable.sqlSpliec}" == "true")
+                #if(${templatesTable.idType} == 4)
+                    .${templatesFields.lowerPropertyName}(IdWorker.get32UUID())
+                #end
+                #if(${templatesTable.idType} == 3)
+                    #if(${templatesFields.propertyType} == "String")
+                    .${templatesFields.lowerPropertyName}(IdWorker.getIdStr())
+                        #else
+                    .${templatesFields.lowerPropertyName}(IdWorker.getId())
+                        #end
+                #end
+            #end
         #else
             #if("$!{templatesFields.defaulted}" != "")
-                    .${templatesFields.lowerPropertyName}($to == null ? $toValue : $to)
+                    .${templatesFields.lowerPropertyName}(e.get${templatesFields.value}() == null ? $toValue : $to)
             #else
                     .${templatesFields.lowerPropertyName}($to)
             #end
         #end
+        #end
     #end
                     .build();
+
+#foreach(${templatesJoinTables} in ${templatesTable.templatesJoinTables})
+            List<${templatesJoinTables.entityName}> ${templatesJoinTables.lowerEntityName}By${templatesJoinTables.field}List = Optional.ofNullable(${templatesJoinTables.lowerEntityName}By${templatesJoinTables.field}Map.get(e.get${templatesJoinTables.field}())).orElseGet(ArrayList::new);
+#end
+
+#foreach(${templatesFields} in ${templatesTable.distinctTemplatesFields})
+            ${templatesFields.valueMapEntity} ${templatesFields.valueMap}${templatesFields.value} = ${templatesFields.valueMap}List.stream().filter(v -> v.get${templatesFields.value}() != null).findFirst().orElse(null);
+#end
+
+#foreach(${templatesFields} in ${templatesTable.templatesFields})
+#if("$!templatesFields.valueMap" != "")
+    #if("$!templatesFields.propertyType" == "byte[]")
+        #set($propertyType="Byte")
+    #else
+        #set($propertyType=${templatesFields.propertyType})
+    #end
+    #if("$!templatesFields.valueType" == "byte[]")
+        #set($valueType="Byte")
+    #else
+        #set($valueType=${templatesFields.valueType})
+    #end
+    #if("$!{templatesFields.propertyType}" != "$!templatesFields.valueType")
+        #set($to=${valueType}+"To"+${propertyType}+"("+${templatesFields.valueMap}+${templatesFields.value}+".get"+${templatesFields.value}+"())")
+    #else
+        #set($to=${templatesFields.valueMap}+${templatesFields.value}+".get"+${templatesFields.value}+"()")
+    #end
+            ${templatesTable.lowerEntityName}.set${templatesFields.propertyName}(${templatesFields.valueMap}${templatesFields.value} == null ? null : $to);
+    #end
+    #end
 
             ${templatesTable.lowerEntityName}List.add(${templatesTable.lowerEntityName});
         });
@@ -90,4 +170,96 @@ public class ${templatesTable.handlerName} extends PageAndKeyDataPushV3Handler<$
     public Integer getPosition() {
         return ${templatesTable.position};
     }
+    #if(${templatesTable.queryMap.entrySet().size()} > 0)
+
+    @Override
+    protected QueryWrapper<${templatesTable.sourceName}> queryWrapper() {
+        HashMap<String, Object> map = new HashMap<>();
+
+        #foreach(${data} in $templatesTable.queryMap.entrySet())
+        #if(${templatesTable.queryMapType.get(${data.key})} == "byte[]")
+            #set($valueType="Byte")
+        #else
+            #set($valueType=${templatesTable.queryMapType.get(${data.key})})
+        #end
+            #if(${data.key.indexOf('_&in')}==-1 && ${data.key.indexOf('_&notIn')}==-1)
+            #if($valueType == "String" || ${data.key.indexOf('_&last')}!=-1)
+                #set($v='"'+${data.value}+'"')
+            #else
+                #set($v='String'+'To'+$valueType+'("'+${data.value}+'")')
+            #end
+        #else
+            #if($valueType == "String" )
+                #set($v='Arrays.asList("'+${data.value}+'")')
+            #else
+                #set($v='Arrays.asList("'+${data.value}+'").stream().map(DataPushUtil::StringTo'+$valueType+').collect(Collectors.toList())')
+            #end
+            #end
+        map.put("${data.key}", $v);
+    #end
+
+        return Condition.getQueryWrapper(map, ${templatesTable.sourceName}.class);
+    }
+    #end
+
+#if(${templatesTable.templatesJoinTables.size()} > 0)
+/*================================================================================以下是关联查询================================================================================*/
+
+#end
+#foreach(${templatesJoinTables} in ${templatesTable.templatesJoinTables})
+    #set($select="")
+    #foreach(${e} in ${templatesJoinTables.selectList})
+        #if($select == "")
+            #set($select="${templatesJoinTables.entityName}::get${e}")
+        #else
+            #set($select="${select}"+", "+"${templatesJoinTables.entityName}::get${e}")
+        #end
+    #end
+    private Map<${templatesJoinTables.fieldType}, List<${templatesJoinTables.entityName}>> get${templatesJoinTables.entityName}By${templatesJoinTables.field}Map(List<${templatesTable.sourceName}> data) {
+        List<${templatesJoinTables.fieldType}> ${templatesJoinTables.lowerField}s = data.stream().map(${templatesTable.sourceName}::get${templatesJoinTables.field}).distinct().collect(Collectors.toList());
+    #if(${templatesJoinTables.queryMap.entrySet().size()} <= 0)
+        QueryWrapper<${templatesJoinTables.entityName}> queryWrapper = new QueryWrapper<>();
+        #else
+        HashMap<String, Object> map = new HashMap<>();
+
+            #foreach(${data} in $templatesJoinTables.queryMap.entrySet())
+                #if(${templatesJoinTables.queryMapType.get(${data.key})} == "byte[]")
+                    #set($valueType="Byte")
+                #else
+                    #set($valueType=${templatesJoinTables.queryMapType.get(${data.key})})
+                #end
+                #if(${data.key.indexOf('_&in')}==-1 && ${data.key.indexOf('_&notIn')}==-1)
+                    #if($valueType == "String" || ${data.key.indexOf('_&last')}!=-1)
+                        #set($v='"'+${data.value}+'"')
+                    #else
+                        #set($v='String'+'To'+$valueType+'("'+${data.value}+'")')
+                    #end
+                #else
+                    #if($valueType == "String" )
+                        #set($v='Arrays.asList("'+${data.value}+'")')
+                    #else
+                        #set($v='Arrays.asList("'+${data.value}+'").stream().map(DataPushUtil::StringTo'+$valueType+').collect(Collectors.toList())')
+                    #end
+                #end
+        map.put("${data.key}", $v);
+            #end
+        QueryWrapper<${templatesJoinTables.entityName}> queryWrapper = Condition.getQueryWrapper(map, ${templatesJoinTables.entityName}.class);
+#end
+        List<${templatesJoinTables.entityName}> ${templatesJoinTables.lowerEntityName}List = ${templatesJoinTables.lowerServiceName}.list(queryWrapper
+                .lambda()
+                .select(${select})
+                .in(${templatesJoinTables.entityName}::get${templatesJoinTables.joinFiled}, ${templatesJoinTables.lowerField}s));
+
+        if (CollectionUtils.isEmpty(${templatesJoinTables.lowerEntityName}List)) {
+            return new HashMap<${templatesJoinTables.fieldType}, List<${templatesJoinTables.entityName}>>();
+        }
+    #if ("$!{templatesJoinTables.fieldType}" == "$!{templatesJoinTables.joinFiledType}")
+        #set($key="${templatesJoinTables.entityName}::get${templatesJoinTables.joinFiled}")
+    #else
+        #set($key="e -> $!{templatesJoinTables.joinFiledType}To${templatesJoinTables.fieldType}(e.get${templatesJoinTables.joinFiled}())")
+    #end
+        return ${templatesJoinTables.lowerEntityName}List.stream().collect(Collectors.groupingBy($key));
+    }
+
+#end
 }

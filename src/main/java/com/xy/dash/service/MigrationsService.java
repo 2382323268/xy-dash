@@ -20,12 +20,17 @@ public interface MigrationsService extends IService<Migrations> {
     /**
      * 生成代码
      */
-    void generatingCode(Long id);
+    void generatingCode(Long id, String remark);
 
     /**
      * 添加配置
      */
     void add(Migrations migrations);
+
+    /**
+     * 删除
+     */
+    void batchDelete(Long id);
 
     IPage<Migrations> queryPage(Map<String, Object> param, Query query);
 

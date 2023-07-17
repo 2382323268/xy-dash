@@ -9,6 +9,6 @@ public interface DataPushConstant {
     String SQL_SERVER = "top %s ";
     String MYSQL = "limit ";
     String ID = "id";
-    String TIME = "createdTime";
+    String TIME = "xyCreatedTime";
 
 }

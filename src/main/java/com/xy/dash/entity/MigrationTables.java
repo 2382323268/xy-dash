@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.annotation.*;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
+import com.xy.dash.config.handler.StringToMapTypeHandler;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -17,7 +19,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Data
-@TableName("xy_migration_tables")
+@TableName(value = "xy_migration_tables", autoResultMap = true)
 @ToString(callSuper = true)
 public class MigrationTables extends BaseEntity implements Serializable {
 
@@ -62,6 +64,15 @@ public class MigrationTables extends BaseEntity implements Serializable {
     @ApiModelProperty("来源唯一名称")
     private String sourceUniqueName;
 
+    @ApiModelProperty("下标")
+    private Integer random;
+
+    @ApiModelProperty("查询条件")
+    @TableField(typeHandler = StringToMapTypeHandler.class)
+    private Map<String, String> queryMap;
+
+    @ApiModelProperty("id生成策略")
+    private Integer idType;
 
     @TableField(exist = false)
     @NotEmpty(message = "字段配置不能为空")
@@ -72,7 +83,10 @@ public class MigrationTables extends BaseEntity implements Serializable {
     @TableField(exist = false)
     private Integer type;
 
-    @ApiModelProperty("下标")
-    @NotNull(message = "下标不能为空")
-    private Integer random;
+    @ApiModelProperty("唯一名称")
+    @TableField(exist = false)
+    private String uniqueName;
+
+    @TableField(exist = false)
+    private List<MigrationJoinTables> migrationJoinTables;
 }

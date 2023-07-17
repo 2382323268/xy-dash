@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.annotation.*;
 
 import java.time.LocalDateTime;
 import java.io.Serializable;
+import java.util.List;
 
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -14,7 +16,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
-@TableName("xy_migration_fields")
+@TableName(value = "xy_migration_fields", autoResultMap = true)
 @ToString(callSuper = true)
 public class MigrationFields extends BaseEntity implements Serializable {
 
@@ -68,7 +70,8 @@ public class MigrationFields extends BaseEntity implements Serializable {
      */
     private String valueType;
 
-    private String valueMap;
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private List<String> valueMap;
 
     /**
      * 默认值

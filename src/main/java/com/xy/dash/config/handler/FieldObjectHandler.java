@@ -41,7 +41,7 @@ public class FieldObjectHandler implements MetaObjectHandler {
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        log.info("start update fill ....");
+//        log.info("start update fill ....");
         this.setFieldValByName(MODIFIED_TIME, LocalDateTime.now(), metaObject);
         this.setFieldValByName(MODIFIED, getUser(), metaObject);
         this.setFieldValByName(MODIFIED_ID, 0L, metaObject);

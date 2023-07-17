@@ -31,9 +31,9 @@ mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
-logging:
-  level:
-    com.xy.dash.mapper: debug
+#logging:
+#  level:
+#    com.xy.dash.mapper: debug
 
 
 swagger:

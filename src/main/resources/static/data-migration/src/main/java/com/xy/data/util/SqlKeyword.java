@@ -10,6 +10,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.Map;
 
 public class SqlKeyword {
@@ -40,40 +41,36 @@ public class SqlKeyword {
         if (!ObjectUtils.isEmpty(query)) {
             query.forEach((k, v) -> {
                 if (!hasEmpty(new Object[]{k, v}) && !k.endsWith("_ignore")) {
-                    if (k.endsWith("_equal")) {
-                        qw.eq(getColumn(k, "_equal"), v);
-                    } else if (k.endsWith("_notequal")) {
-                        qw.ne(getColumn(k, "_notequal"), v);
-                    } else if (k.endsWith("_likeleft")) {
-                        qw.likeLeft(getColumn(k, "_likeleft"), v);
-                    } else if (k.endsWith("_likeright")) {
-                        qw.likeRight(getColumn(k, "_likeright"), v);
-                    } else if (k.endsWith("_notlike")) {
-                        qw.notLike(getColumn(k, "_notlike"), v);
-                    } else if (k.endsWith("_ge")) {
-                        qw.ge(getColumn(k, "_ge"), v);
-                    } else if (k.endsWith("_le")) {
-                        qw.le(getColumn(k, "_le"), v);
-                    } else if (k.endsWith("_gt")) {
-                        qw.gt(getColumn(k, "_gt"), v);
-                    } else if (k.endsWith("_lt")) {
-                        qw.lt(getColumn(k, "_lt"), v);
-                    } else if (k.endsWith("_datege")) {
-                        qw.ge(getColumn(k, "_datege"), LocalDateTime.parse(String.valueOf(v), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                    } else if (k.endsWith("_dategt")) {
-                        qw.gt(getColumn(k, "_dategt"), LocalDateTime.parse(String.valueOf(v), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                    } else if (k.endsWith("_dateequal")) {
-                        qw.eq(getColumn(k, "_dateequal"), LocalDateTime.parse(String.valueOf(v), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                    } else if (k.endsWith("_datele")) {
-                        qw.le(getColumn(k, "_datele"), LocalDateTime.parse(String.valueOf(v), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                    } else if (k.endsWith("_datelt")) {
-                        qw.lt(getColumn(k, "_datelt"), LocalDateTime.parse(String.valueOf(v), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                    } else if (k.endsWith("_null")) {
-                        qw.isNull(getColumn(k, "_null"));
-                    } else if (k.endsWith("_notnull")) {
-                        qw.isNotNull(getColumn(k, "_notnull"));
-                    } else {
-                        qw.like(getColumn(k, "_like"), v);
+                    if (k.endsWith("_&eq")) {
+                        qw.eq(getColumn(k, "_&eq"), v);
+                    } else if (k.endsWith("_&ne")) {
+                        qw.ne(getColumn(k, "_&ne"), v);
+                    } else if (k.endsWith("_&likeLeft")) {
+                        qw.likeLeft(getColumn(k, "_&likeLeft"), v);
+                    } else if (k.endsWith("_&likeRight")) {
+                        qw.likeRight(getColumn(k, "_&likeRight"), v);
+                    } else if (k.endsWith("_&notLike")) {
+                        qw.notLike(getColumn(k, "_&notLike"), v);
+                    } else if (k.endsWith("_&ge")) {
+                        qw.ge(getColumn(k, "_&ge"), v);
+                    } else if (k.endsWith("_&le")) {
+                        qw.le(getColumn(k, "_&le"), v);
+                    } else if (k.endsWith("_&gt")) {
+                        qw.gt(getColumn(k, "_&gt"), v);
+                    } else if (k.endsWith("_&lt")) {
+                        qw.lt(getColumn(k, "_&lt"), v);
+                    } else if (k.endsWith("_&isNull")) {
+                        qw.isNull(getColumn(k, "_&isNull"));
+                    } else if (k.endsWith("_&isNotNull")) {
+                        qw.isNotNull(getColumn(k, "_&isNotNull"));
+                    } else if (k.endsWith("_&like")) {
+                        qw.like(getColumn(k, "_&like"), v);
+                    } else if (k.endsWith("_&in")) {
+                        qw.in(getColumn(k, "_&in"), (Collection) v);
+                    } else if (k.endsWith("_&notIn")) {
+                        qw.notIn(getColumn(k, "_&notIn"), (Collection) v);
+                    } else if (k.endsWith("_&last")) {
+                        qw.last(v.toString());
                     }
 
                 }

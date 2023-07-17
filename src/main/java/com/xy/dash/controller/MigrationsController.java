@@ -51,4 +51,18 @@ public class MigrationsController {
         migrationsService.add(migrations);
         return R.status(true);
     }
+
+    @PostMapping("/{id}/delete")
+    @ApiOperation(value = "删除")
+    public R delete(@PathVariable Long id) {
+        migrationsService.batchDelete(id);
+        return R.status(true);
+    }
+
+    @PostMapping("/{id}/generatingCode")
+    @ApiOperation(value = "生成代码")
+    public R generatingCode(@PathVariable Long id, @RequestParam("remark") String remark) {
+        migrationsService.generatingCode(id, remark);
+        return R.status(true);
+    }
 }

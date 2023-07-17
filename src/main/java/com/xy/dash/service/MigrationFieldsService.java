@@ -14,12 +14,13 @@ import java.util.List;
  * @author author
  * @since 2022-11-29
  */
-public interface MigrationFieldsService extends IService<MigrationFields>{
+public interface MigrationFieldsService extends IService<MigrationFields> {
 
     /**
      * 根据表id获取字段模板
+     *
      * @param tableId
      * @return
      */
-    List<TemplatesFields> getTemplatesFields(Long tableId);
+    List<TemplatesFields> getTemplatesFields(Long tableId, List<String> tableNames);
 }

@@ -23,7 +23,7 @@ public enum FieldStatus {
     /**
      * 创建
      */
-    CREATED(2, "CreatedTime");
+    CREATED(2, "XyCreatedTime");
 
     private final Integer code;
     private final String name;

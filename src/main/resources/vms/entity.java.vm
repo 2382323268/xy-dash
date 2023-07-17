@@ -43,7 +43,23 @@ public class ${templatesTable.entityName} {
      * ${templatesFields.remark}
      */
     #if(${templatesFields.status.equals(1)})
-    @TableId(value = "${templatesFields.fieldName}")
+       #if(${templatesTable.idType} == 1 || !${templatesTable.idType})
+           #set($idType="")
+       #end
+        #if(${templatesTable.idType} == 2)
+            #set($idType=", type = IdType.AUTO")
+        #end
+        #if(${templatesTable.idType} == 3)
+            #if(${templatesFields.propertyType} == "String")
+            #set($idType=", type = IdType.ID_WORKER_STR")
+                #else
+                    #set($idType=", type = IdType.ID_WORKER")
+                #end
+        #end
+        #if(${templatesTable.idType} == 4)
+            #set($idType=", type = IdType.UUID")
+        #end
+    @TableId(value = "${templatesFields.fieldName}"$idType)
     #else
     @TableField(value = "${templatesFields.fieldName}")
     #end

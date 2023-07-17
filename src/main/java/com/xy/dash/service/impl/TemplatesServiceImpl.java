@@ -1,7 +1,9 @@
 package com.xy.dash.service.impl;
 
+import com.xy.dash.entity.Migrations;
 import com.xy.dash.enums.TemplatePathType;
 import com.xy.dash.service.TemplatesService;
+import com.xy.dash.utli.BeanUtil;
 import com.xy.dash.vo.TemplatesAdd;
 import com.xy.dash.vo.TemplatesDataSources;
 import com.xy.dash.vo.TemplatesFields;
@@ -74,14 +76,18 @@ public class TemplatesServiceImpl implements TemplatesService {
                  * 需求：迁移表可能存在多个数据，但只需要生成一个实体类，同时需要统计所有数据需要的字段
                  * 1.根据表名+数据源名称去重复
                  * 2.重新计算字段数据
+                 * 3.有一个表数据是 migration == true 该表数据就设置为true
                  */
+                Map<String, List<TemplatesTables>> map = templatesTables.stream().collect(Collectors.groupingBy(TemplatesTables::getEntityName));
+                List<String> tableName = templatesTables.stream().filter(TemplatesTables::getMigration).map(TemplatesTables::getName).collect(Collectors.toList());
                 List<TemplatesTables> collect = templatesTables.stream().collect(
                         Collectors.collectingAndThen(
                                 Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(TemplatesTables::getEntityName))),
                                 ArrayList::new)
                 );
-                Map<String, List<TemplatesTables>> map = templatesTables.stream().collect(Collectors.groupingBy(TemplatesTables::getEntityName));
-                collect.forEach(v -> {
+
+                List<TemplatesTables> list = collect.stream().map(v -> {
+                    TemplatesTables templatesTables1 = BeanUtil.copyProperties(v, TemplatesTables.class);
                     List<TemplatesTables> tables = map.get(v.getEntityName());
                     if (tables.size() > 1) {
                         // 拿到所有字段 然后根据字段名称去重复
@@ -92,9 +98,13 @@ public class TemplatesServiceImpl implements TemplatesService {
                         );
                         v.setTemplatesFields(templatesFields);
                     }
-                });
+                    if (tableName.contains(v.getName())) {
+                        templatesTables1.setMigration(true);
+                    }
+                    return templatesTables1;
+                }).collect(Collectors.toList());
                 //生成基础代码
-                createFileByTemplateCommon(e, collect, rootPath);
+                createFileByTemplateCommon(e, list, rootPath);
             }
 
             if (e.isHandler()) {

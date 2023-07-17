@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Builder;
 import lombok.Data;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.ToString;
@@ -37,6 +38,7 @@ public class Migrations extends BaseEntity implements Serializable {
      * 线程数量
      */
     @ApiModelProperty("线程数量")
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private Integer threadCount;
 
     /**
@@ -45,6 +47,13 @@ public class Migrations extends BaseEntity implements Serializable {
     @ApiModelProperty("是否开启线程")
     @NotNull(message = "startThread参数不能为空")
     private Boolean startThread;
+
+    /**
+     * 迁移类型
+     */
+    @ApiModelProperty("迁移类型")
+    @NotNull(message = "迁移类型不能为空")
+    private String type;
 
     /**
      * 启动端口号

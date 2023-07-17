@@ -20,6 +20,8 @@ import lombok.NoArgsConstructor;
 @ApiModel
 public class TemplatesFields {
 
+    private Long id;
+
     /**
      * 字段名称
      */
@@ -55,6 +57,8 @@ public class TemplatesFields {
     private String value;
 
     private String valueMap;
+
+    private String valueMapEntity;
 
     /**
      * 默认值

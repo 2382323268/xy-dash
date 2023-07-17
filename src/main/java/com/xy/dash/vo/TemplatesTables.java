@@ -11,7 +11,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: xiangwei
@@ -25,6 +27,12 @@ import java.util.List;
 @ApiModel
 public class TemplatesTables {
 
+    private Long id;
+
+    private Integer idType;
+
+    private Boolean sqlSpliec;
+
     /**
      * 数据源配置id
      */
@@ -36,12 +44,6 @@ public class TemplatesTables {
      */
     @ApiModelProperty("是否迁移表")
     private Boolean migration;
-
-    /**
-     * 表字段
-     */
-    @ApiModelProperty("表字段")
-    private String field;
 
     /**
      * 表名
@@ -96,7 +98,22 @@ public class TemplatesTables {
     @ApiModelProperty("类型")
     private Integer type;
 
+    /**
+     * 迁移类型
+     */
+    private String migrationType;
+
+    private Map<String, String> queryMap;
+
+    private Map<String, String> queryMapType;
+
     private List<TemplatesFields> templatesFields;
+
+    private List<TemplatesFields> distinctTemplatesFields;
+
+    private List<TemplatesJoinTables> distinctTemplatesJoinTables;
+
+    private List<TemplatesJoinTables> templatesJoinTables;
 
     public String getName(TemplatePathType e) {
         switch (e.getKey()) {
