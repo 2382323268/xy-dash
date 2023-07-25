@@ -1,0 +1,2 @@
+"use strict";(self["webpackChunkxy_dash_admin"]=self["webpackChunkxy_dash_admin"]||[]).push([[780],{89:function(n,c){c.Z=(n,c)=>{const e=n.__vccOpts||n;for(const[t,a]of c)e[t]=a;return e}},1780:function(n,c,e){e.r(c),e.d(c,{default:function(){return d}});var t=e(3396);const a={className:"home"};function s(n,c,e,s,r,o){return(0,t.wg)(),(0,t.iD)("div",a,"角色管理")}var r={name:"index"},o=e(89);const u=(0,o.Z)(r,[["render",s],["__scopeId","data-v-348b596c"]]);var d=u}}]);
+//# sourceMappingURL=780.87cdbe29.js.map

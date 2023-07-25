@@ -38,6 +38,14 @@ public class test {
 
     @Test
     public void t() {
+        /**
+         * 1. 映射id迁移
+         * 2. 枚举映射
+         * 3. 连接查询嵌套
+         * 4. 定时任务
+         * 5. 支持linux jar运行参数
+         * 6. 菜单用户权限登录
+         */
         for (int i = 10; i > -1; i--) {
             int finalI = i;
                 threadPoolTaskExecutor.execute(()->{

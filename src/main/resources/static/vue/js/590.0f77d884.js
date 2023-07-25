@@ -1,0 +1,2 @@
+"use strict";(self["webpackChunkxy_dash_admin"]=self["webpackChunkxy_dash_admin"]||[]).push([[590],{89:function(n,c){c.Z=(n,c)=>{const e=n.__vccOpts||n;for(const[a,t]of c)e[a]=t;return e}},9590:function(n,c,e){e.r(c),e.d(c,{default:function(){return d}});var a=e(3396);const t={className:"home"};function s(n,c,e,s,r,o){return(0,a.wg)(),(0,a.iD)("div",t,"欢迎使用，小羽数据迁移 ！")}var r={name:"index"},o=e(89);const u=(0,o.Z)(r,[["render",s],["__scopeId","data-v-ecc30b3a"]]);var d=u}}]);
+//# sourceMappingURL=590.0f77d884.js.map

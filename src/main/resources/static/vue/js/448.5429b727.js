@@ -1,0 +1,2 @@
+"use strict";(self["webpackChunkxy_dash_admin"]=self["webpackChunkxy_dash_admin"]||[]).push([[448],{89:function(n,e){e.Z=(n,e)=>{const a=n.__vccOpts||n;for(const[c,t]of e)a[c]=t;return a}},7448:function(n,e,a){a.r(e),a.d(e,{default:function(){return u}});var c=a(3396);const t={className:"home"};function s(n,e,a,s,r,d){return(0,c.wg)(),(0,c.iD)("div",t,"用户管理")}var r={name:"index"},d=a(89);const o=(0,d.Z)(r,[["render",s],["__scopeId","data-v-e8bdca64"]]);var u=o}}]);
+//# sourceMappingURL=448.5429b727.js.map
