@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,6 +44,12 @@ public class MigrationsController {
     @ApiOperation(value = "查询")
     public IPage<Migrations> page(@ApiIgnore @RequestParam Map<String, Object> param, Query query) {
         return migrationsService.queryPage(param, query);
+    }
+
+    @GetMapping("/list")
+    @ApiOperation(value = "列表")
+    public List<Migrations> list() {
+        return migrationsService.list();
     }
 
     @PostMapping("")

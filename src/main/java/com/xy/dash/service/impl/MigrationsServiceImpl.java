@@ -43,6 +43,8 @@ public class MigrationsServiceImpl extends ServiceImpl<MigrationsMapper, Migrati
     @Autowired
     private MigrationTablesService migrationTablesService;
     @Autowired
+    private MigrationCodesService migrationCodesService;
+    @Autowired
     private MigrationFieldsService migrationFieldsService;
     @Autowired
     private MigrationJoinTablesService migrationJoinTablesService;
@@ -57,7 +59,6 @@ public class MigrationsServiceImpl extends ServiceImpl<MigrationsMapper, Migrati
         if (migrations == null) {
             throw new ServiceException("数据迁移配置不存在！");
         }
-        migrations.setThreadCount(migrations.getThreadCount() == null ? 500 : migrations.getThreadCount());
         // 获取数据源配置
         List<TemplatesDataSources> templatesDataSources = migrationDataSourcesService.getTemplatesDataSources(id);
         // 获取表配置
@@ -66,9 +67,9 @@ public class MigrationsServiceImpl extends ServiceImpl<MigrationsMapper, Migrati
             e.setSqlSpliec(migrations.getSqlSpliec());
             e.setMigrationType(migrations.getType());
         });
-
-        // todo 保存到代码记录
         String name = "data-migration".concat(DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDateTime.now()).concat((int) ((Math.random() * 9 + 1) * 1000) + ""));
+        MigrationCodes migrationCodes = MigrationCodes.builder().migrationId(id).fileName(name).remark(remark).runCount(0).build();
+        migrationCodesService.save(migrationCodes);
 
         templatesService.create(TemplatesAdd.builder().migrations(migrations).templatesTables(templatesTables).migrationDataSources(templatesDataSources).fileName(name).build());
     }
@@ -287,7 +288,11 @@ public class MigrationsServiceImpl extends ServiceImpl<MigrationsMapper, Migrati
         List<Long> sourcesIds = migrationDataSources.stream()
                 .filter(e -> e.getType().equals(1))
                 .map(MigrationDataSources::getId).collect(Collectors.toList());
-
+        int count = count(Wrappers.<Migrations>lambdaQuery().eq(Migrations::getName, migrations.getName())
+                .ne(migrations.getId() != null, Migrations::getId, migrations.getId()));
+        if (count > 0) {
+            throw new ServiceException("名称不能重复！");
+        }
         if (Boolean.TRUE.equals(migrations.getStartThread()) && migrations.getThreadCount() == null) {
             throw new ServiceException("线程数量不能为空！");
         }

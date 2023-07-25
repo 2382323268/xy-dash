@@ -2,6 +2,7 @@ package com.xy.dash.service;
 
 import com.xy.dash.entity.MigrationCodeOperations;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xy.dash.vo.MigrationCodeOperationDetails;
 
 /**
  * <p>
@@ -13,4 +14,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface MigrationCodeOperationsService extends IService<MigrationCodeOperations> {
 
+    void run(Long id, String fileName);
+
+    MigrationCodeOperationDetails details(Long id);
 }

@@ -35,6 +35,11 @@ mybatis-plus:
 #  level:
 #    com.xy.dash.mapper: debug
 
+task:
+  core-pool-size: 10
+  max-pool-size: 30
+  queue-capacity: 50
+  keep-alive-seconds: 60
 
 swagger:
   enable: true

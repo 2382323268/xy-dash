@@ -35,7 +35,5 @@ public class XyDashApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(XyDashApplication.class, args);
-//        MigrationsService bean = SpringUtil.getBean(MigrationsService.class);
-//        bean.generatingCode(180L);
     }
 }

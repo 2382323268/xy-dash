@@ -5,16 +5,18 @@ import com.baomidou.mybatisplus.annotation.*;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.NoArgsConstructor;
 
 @Data
-@TableName("xy_migration_codes")
-@ToString(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MigrationCodes extends BaseEntity implements Serializable {
+@TableName("xy_migration_code_operation_historys")
+public class MigrationCodeOperationHistorys extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -25,30 +27,18 @@ public class MigrationCodes extends BaseEntity implements Serializable {
     private Long id;
 
     /**
-     * 迁移id
+     * 操作id
      */
-    private Long migrationId;
+    private Long operationId;
 
     /**
-     * 文件名
+     * 0 执行失败 1 执行成功 2 开始执行 3 生成jar 4 运行中
      */
-    private String fileName;
+    private Integer status;
 
-    /**
-     * 运行次数
-     */
-    private Integer runCount;
+    private String msg;
 
-    /**
-     * 备注
-     */
-    private String remark;
-
-    /**
-     * 迁移id
-     */
     @TableField(exist = false)
-    private String migrationName;
-
+    private String color;
 
 }

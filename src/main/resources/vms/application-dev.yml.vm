@@ -1,8 +1,14 @@
 #foreach(${dataSources} in ${xy.migrationDataSources})
   #set($primary=$dataSources.uniqueName)
 #end
-
-#set($maxActive=${xy.migrations.threadCount}*2)
+#if("$!xy.migrations.threadCount" == "" || ${xy.migrations.threadCount} <10)
+  #set($maxActive=50)
+  #set($initialSize=10)
+  #set($xy.migrations.threadCount=1)
+ #else
+  #set($maxActive=${xy.migrations.threadCount}*2)
+  #set($initialSize=${xy.migrations.threadCount})
+#end
 server:
   port: ${xy.migrations.port}
 spring:
@@ -36,7 +42,7 @@ spring:
         #end
       # druid 全局配置
       druid:
-        initialSize: ${xy.migrations.threadCount}
+        initialSize: ${initialSize}
         minIdle: 5
         maxActive: ${maxActive}
         # 配置获取连接等待超时的时间

@@ -7,12 +7,14 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
-import lombok.Data;
+import lombok.*;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.ToString;
 
 @Data
 @TableName("xy_migration_code_operations")
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @ToString(callSuper = true)
 public class MigrationCodeOperations extends BaseEntity implements Serializable {
 
@@ -39,4 +41,8 @@ public class MigrationCodeOperations extends BaseEntity implements Serializable 
      */
     private String remark;
 
+    /**
+     * 状态
+     */
+    private Integer status;
 }

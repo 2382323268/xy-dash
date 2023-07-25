@@ -4,6 +4,7 @@ import com.xy.dash.entity.Migrations;
 import com.xy.dash.enums.TemplatePathType;
 import com.xy.dash.service.TemplatesService;
 import com.xy.dash.utli.BeanUtil;
+import com.xy.dash.utli.XyConstant;
 import com.xy.dash.vo.TemplatesAdd;
 import com.xy.dash.vo.TemplatesDataSources;
 import com.xy.dash.vo.TemplatesFields;
@@ -33,8 +34,6 @@ import java.util.stream.Collectors;
 public class TemplatesServiceImpl implements TemplatesService {
     @Override
     public void create(TemplatesAdd add) {
-        String path = FileWriter.class.getResource("/").getPath();
-        String rootPath = path.substring(0, path.indexOf("xy-dash")).concat("GeneratingCode/");
         String name = add.getFileName();
 
         Properties prop = new Properties();
@@ -45,12 +44,35 @@ public class TemplatesServiceImpl implements TemplatesService {
         context.put("xy", add);
 
         // 删除文件
-        deleteFile(new File(rootPath.concat(name)));
+        deleteFile(new File(XyConstant.PATH.concat(name)));
         // 复制固定代码到指定目录
-        copyAllFinalFiles(rootPath, path, name);
+        copyAllFinalFiles(XyConstant.PATH, XyConstant.FILE_PATH, name);
         // 根据模板生成代码到指定目录
-        createAllFiles(context, rootPath.concat(name));
+        createAllFiles(context, XyConstant.PATH.concat(name));
 
+    }
+
+    @Override
+    public void deleteFile(File file) {
+        //判断文件不为null或文件目录存在
+        if (file == null || !file.exists()) {
+            return;
+        }
+        //取得这个目录下的所有子文件对象
+        File[] files = file.listFiles();
+        //遍历该目录下的文件对象
+        for (File f : files) {
+            //打印文件名
+            String name = file.getName();
+            //判断子目录是否存在子目录,如果是文件则删除
+            if (f.isDirectory()) {
+                deleteFile(f);
+            } else {
+                f.delete();
+            }
+        }
+        //删除空文件夹  for循环已经把上一层节点的目录清空。
+        file.delete();
     }
 
     private void createAllFiles(VelocityContext context, String rootPath) {
@@ -207,26 +229,4 @@ public class TemplatesServiceImpl implements TemplatesService {
         }
     }
 
-
-    public void deleteFile(File file) {
-        //判断文件不为null或文件目录存在
-        if (file == null || !file.exists()) {
-            return;
-        }
-        //取得这个目录下的所有子文件对象
-        File[] files = file.listFiles();
-        //遍历该目录下的文件对象
-        for (File f : files) {
-            //打印文件名
-            String name = file.getName();
-            //判断子目录是否存在子目录,如果是文件则删除
-            if (f.isDirectory()) {
-                deleteFile(f);
-            } else {
-                f.delete();
-            }
-        }
-        //删除空文件夹  for循环已经把上一层节点的目录清空。
-        file.delete();
-    }
 }
