@@ -1,7 +1,12 @@
 package com.xy.dash.config;
 
+import org.springframework.boot.web.server.ConfigurableWebServerFactory;
+import org.springframework.boot.web.server.ErrorPage;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.config.annotation.*;
 
 /**
@@ -22,6 +27,13 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowCredentials(false);
+    }
+    @Bean
+    public WebServerFactoryCustomizer<ConfigurableWebServerFactory> webServerFactoryCustomizer(){
+        return factory -> {
+            ErrorPage error404Page = new ErrorPage(HttpStatus.NOT_FOUND, "/vue/index.html");
+            factory.addErrorPages(error404Page);
+        };
     }
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

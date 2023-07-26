@@ -45,6 +45,7 @@ public class test {
          * 4. 定时任务
          * 5. 支持linux jar运行参数
          * 6. 菜单用户权限登录
+         * 7. 支持多种数据库
          */
         for (int i = 10; i > -1; i--) {
             int finalI = i;
