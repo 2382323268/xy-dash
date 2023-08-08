@@ -91,7 +91,7 @@ public class MigrationTablesServiceImpl extends ServiceImpl<MigrationTablesMappe
                     if (f.getStatus() != 0) {
                         String name = StringUtil.upperCase(StringUtil.lineToHump(f.getFieldName()));
                         e.getTemplatesFields().forEach(x -> {
-                            if (x.getValue().equals(name)) {
+                            if (x.getValue() != null && x.getValue().equals(name)) {
                                 x.setValue(f.getPropertyName());
                             }
                         });
