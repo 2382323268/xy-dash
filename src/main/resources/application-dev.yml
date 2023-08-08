@@ -6,7 +6,7 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/xy_dash?serverTimezone=GMT%2B8&useSSL=FALSE&rewriteBatchedStatements=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: wxwmys999
+    password: 123456
       # druid 全局配置
     druid:
      initialSize: 10
