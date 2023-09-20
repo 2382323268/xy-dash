@@ -77,7 +77,7 @@ public class MigrationCodesServiceImpl extends ServiceImpl<MigrationCodesMapper,
 
     @Override
     public void run(Long id, String remark) {
-        synchronized (id) {
+        synchronized (this) {
             MigrationCodes migrationCodes = getById(id);
             migrationCodes.setRunCount(migrationCodes.getRunCount() + 1);
 
