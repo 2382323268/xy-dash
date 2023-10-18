@@ -3,6 +3,7 @@ package com.xy.dash.entity;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xy.dash.utli.ObjectUtils;
 import com.xy.dash.utli.SpringUtil;
 import org.springframework.util.CollectionUtils;
 
@@ -91,7 +92,7 @@ public class OperationData<T, V> {
         IService<T> serviceBean = SpringUtil.getServiceBean(tClass);
         List<T> list = null;
 
-        if (param == null) {
+        if (ObjectUtils.isEmpty(param)) {
             list = serviceBean.list();
         } else if (param instanceof Collection) {
             list = serviceBean.list(Wrappers.<T>lambdaQuery().in(field, (Collection) param));
